@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market Intelligence — Málaga | JamesEdition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prata&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --teal-deep:#006C75;--teal:#0ebab4;--teal-hover:#19818A;--green:#178475;
+  --gold-dark:#b9a16f;--gold-light:#dfd5c0;
+  --black:#151515;--mid:#606060;--light:#878787;--muted:#ADADAD;
+  --border:#E0E0E0;--divider:#ececec;--off-white:#F5F5F5;--near-white:#F7F7F7;--white:#fff;
+  --error:#E63232;--warning:#E79E32;
+  --sans:'Inter',Arial,sans-serif;--serif:'Prata',serif;
+  --shadow-card:0 1px 3px rgba(0,0,0,0.04),0 0 0 1px #ececec;
+  --shadow-pop:0 10px 50px rgba(0,0,0,0.18);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;font-family:var(--sans);font-size:14px;color:var(--black);background:var(--near-white);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0}
+a{color:var(--teal-deep);text-decoration:none}
+.wrap{max-width:1480px;margin:0 auto;padding:0 32px 90px}
+
+/* ---- Header ---- */
+header{background:var(--black);color:#fff;padding:18px 32px 0}
+.hdr-inner{max-width:1480px;margin:0 auto;display:flex;align-items:flex-start;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.brand{font-family:var(--serif);font-size:21px;letter-spacing:.5px}
+.brand span{color:var(--gold-dark)}
+.hdr-title{font-size:14px;color:#cfcfcf;margin-top:6px;font-weight:400}
+.hdr-title b{color:#fff;font-weight:600}
+.hdr-meta{text-align:right;font-size:10.5px;color:#9a9a9a;text-transform:uppercase;letter-spacing:1px;line-height:1.9}
+.hdr-meta b{color:#fff;font-size:12.5px;letter-spacing:0}
+.pill-demo{display:inline-block;background:var(--gold-dark);color:#fff;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:30px}
+/* tabs */
+.tabs{max-width:1480px;margin:18px auto 0;display:flex;gap:4px;align-items:flex-end;justify-content:space-between}
+.tabset{display:flex;gap:4px}
+.ds-wrap{display:flex;align-items:center;gap:8px;padding-bottom:7px}
+.ds-label{font-size:9.5px;text-transform:uppercase;letter-spacing:1px;color:#9a9a9a}
+.ds-switch{background:#2a2a2a;color:#fff;border:1px solid #3a3a3a;border-radius:4px;padding:7px 11px;font-size:13px;font-family:var(--sans);cursor:pointer;min-width:210px}
+.ds-switch:focus{outline:none;border-color:var(--gold-dark)}
+.tab{padding:13px 22px;font-size:14px;font-weight:500;color:#b9b9b9;cursor:pointer;border-bottom:2px solid transparent;display:flex;align-items:center;gap:9px}
+.tab .tnum{font-size:11px;background:#333;color:#ddd;border-radius:30px;padding:1px 8px}
+.tab:hover{color:#fff}
+.tab.active{color:#fff;border-bottom-color:var(--gold-dark)}
+.tab.active .tnum{background:var(--gold-dark);color:#fff}
+
+/* ---- Filter bar ---- */
+.filters{position:sticky;top:0;z-index:60;background:var(--white);border-bottom:1px solid var(--divider);box-shadow:0 1px 8px rgba(0,0,0,.04)}
+.filters-inner{max-width:1480px;margin:0 auto;padding:11px 32px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.flabel{font-size:9.5px;text-transform:uppercase;letter-spacing:1px;color:var(--light);display:block;margin-bottom:3px}
+.fgroup{display:flex;flex-direction:column}
+select,.searchbox{font-family:var(--sans);font-size:13px;color:var(--black);border:1px solid var(--border);border-radius:4px;padding:7px 10px;background:var(--white);outline:none;cursor:pointer;min-width:130px}
+select:focus,.searchbox:focus{border-color:var(--mid)}
+.searchbox{cursor:text;min-width:190px}
+.btn-reset{margin-left:auto;align-self:flex-end;font-size:12px;font-weight:500;color:var(--mid);background:none;border:1px solid var(--border);border-radius:30px;padding:8px 16px;cursor:pointer}
+.btn-reset:hover{border-color:var(--mid);color:var(--black)}
+.fctx{align-self:flex-end;font-size:12px;color:var(--light)}
+.fctx b{color:var(--black)}
+
+/* ---- Sections ---- */
+.tabpane{display:none}
+.tabpane.active{display:block}
+section{margin-top:34px}
+.sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:15px}
+.sec-head h2{font-family:var(--serif);font-size:20px;font-weight:400}
+.gate-tag{font-size:9.5px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--teal-deep);background:#e6f0f1;padding:4px 10px;border-radius:30px}
+.sec-head .desc{font-size:12.5px;color:var(--light);margin-left:auto;max-width:48%;text-align:right}
+.hint{font-size:11px;color:var(--muted);font-weight:400;font-style:italic}
+
+/* funnel */
+.funnel{display:flex;background:var(--white);border-radius:6px;box-shadow:var(--shadow-card);overflow:hidden}
+.fstep{flex:1;padding:24px 22px;position:relative;border-right:1px solid var(--divider);cursor:pointer;transition:background .15s}
+.fstep:hover{background:var(--near-white)}
+.fstep:last-child{border-right:none}
+.fstep .fcap{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--light)}
+.fstep .fnum{font-family:var(--serif);font-size:38px;line-height:1.1;margin:8px 0 2px}
+.fstep .fdesc{font-size:11.5px;color:var(--mid);line-height:1.45}
+.fstep .fpct{display:inline-block;margin-top:9px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:30px;background:var(--off-white);color:var(--mid)}
+.fstep.final{background:linear-gradient(180deg,#fbf8f1,#fff)}
+.fstep.final:hover{background:linear-gradient(180deg,#f7f1e4,#fff)}
+.fstep.final .fnum{color:var(--gold-dark)}
+.fstep.final .fpct{background:var(--gold-light);color:#7a6a40}
+.fstep .arrow{position:absolute;right:-11px;top:50%;transform:translateY(-50%);z-index:2;width:22px;height:22px;background:#fff;border-right:1px solid var(--divider);border-bottom:1px solid var(--divider);rotate:-45deg}
+.fstep:hover .arrow{background:var(--near-white)}
+.fstep:last-child .arrow{display:none}
+
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.kpi{background:var(--white);border-radius:6px;box-shadow:var(--shadow-card);padding:19px;border-top:3px solid var(--teal-deep);cursor:pointer;transition:transform .12s,box-shadow .12s}
+.kpi:hover{transform:translateY(-2px);box-shadow:0 6px 22px rgba(0,0,0,.09),0 0 0 1px #e2e2e2}
+.kpi.nc{cursor:default}.kpi.nc:hover{transform:none;box-shadow:var(--shadow-card)}
+.kpi.g2{border-top-color:var(--gold-dark)}
+.kpi.g3{border-top-color:var(--green)}
+.kpi.prime{border-top-color:var(--black);background:linear-gradient(180deg,#fbf8f1,#fff)}
+.kpi .klabel{font-size:10.5px;text-transform:uppercase;letter-spacing:1px;color:var(--light)}
+.kpi .kval{font-family:var(--serif);font-size:36px;line-height:1.05;margin:9px 0 4px}
+.kpi .ksub{font-size:12px;color:var(--mid);line-height:1.5}
+.kpi .ksub b{color:var(--black)}
+.kpi .kgo{font-size:10.5px;color:var(--teal-deep);font-weight:600;margin-top:9px;opacity:0;transition:opacity .12s}
+.kpi:hover .kgo{opacity:1}
+
+/* panels / charts */
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.panel{background:var(--white);border-radius:6px;box-shadow:var(--shadow-card);padding:20px}
+.panel h3{font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--black);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.panel h3 .clickable{font-size:9px;font-weight:600;letter-spacing:.5px;color:var(--teal-deep);background:#e6f0f1;padding:2px 7px;border-radius:30px;text-transform:none}
+.panel .ph-sub{font-size:11.5px;color:var(--light);margin-bottom:15px}
+.chart-box{position:relative;height:230px}
+.chart-box.short{height:200px}
+
+.statlist{list-style:none;margin:0;padding:0}
+.statlist li{display:flex;align-items:center;justify-content:space-between;padding:9px 4px;border-bottom:1px solid var(--divider);font-size:13px;cursor:pointer;border-radius:4px}
+.statlist li:hover{background:var(--near-white)}
+.statlist li:last-child{border-bottom:none}
+.statlist .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:9px}
+.statlist .nm{display:flex;align-items:center}
+.statlist .vv{font-weight:600}
+.statlist .vv small{color:var(--light);font-weight:400;margin-left:6px}
+
+/* coming soon */
+.cs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.cs{background:repeating-linear-gradient(45deg,#fafafa,#fafafa 10px,#f5f5f5 10px,#f5f5f5 20px);border:1px dashed var(--border);border-radius:6px;padding:18px}
+.cs .csg{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--light)}
+.cs h4{font-size:14px;margin:6px 0 8px}
+.cs p{font-size:11.5px;color:var(--mid);line-height:1.5;margin:0}
+.cs .status{display:inline-block;margin-top:12px;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:3px 10px;border-radius:30px}
+.st-soon{background:#f0f0f0;color:#888}
+.st-prog{background:#fcefd9;color:#a06a1e}
+.cs .partial{font-size:12px;color:var(--mid);margin-top:6px}
+.cs .partial b{color:var(--black);font-size:15px;font-family:var(--serif)}
+
+/* note banner */
+.note{background:#fbf8f1;border:1px solid var(--gold-light);border-radius:6px;padding:13px 16px;font-size:12.5px;color:#6f6244;line-height:1.5;display:flex;gap:10px}
+.note b{color:#54492f}
+.note .ic{color:var(--gold-dark);font-weight:700}
+
+/* recommendations */
+.recs{background:var(--black);color:#eee;border-radius:6px;padding:30px 32px}
+.recs h2{font-family:var(--serif);color:#fff;font-size:21px;font-weight:400;margin-bottom:6px}
+.recs .rsub{color:#a8a8a8;font-size:12.5px;margin-bottom:22px}
+.rec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.rec h4{color:var(--gold-light);font-size:12.5px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.rec p{font-size:12.5px;color:#cfcfcf;line-height:1.55;margin:0}
+.rec .step{display:inline-block;font-family:var(--serif);font-size:19px;color:var(--teal);margin-bottom:6px}
+
+footer{margin-top:38px;text-align:center;font-size:11px;color:var(--light);line-height:1.7}
+
+/* ---- Side panel ---- */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.32);opacity:0;pointer-events:none;transition:opacity .2s;z-index:80}
+.scrim.open{opacity:1;pointer-events:auto}
+.panel-side{position:fixed;top:0;right:0;height:100vh;width:640px;max-width:94vw;background:#fff;box-shadow:var(--shadow-pop);transform:translateX(100%);transition:transform .26s cubic-bezier(.4,0,.2,1);z-index:81;display:flex;flex-direction:column}
+.panel-side.open{transform:translateX(0)}
+.ps-head{padding:20px 24px 16px;border-bottom:1px solid var(--divider)}
+.ps-head .ps-eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--teal-deep);font-weight:600}
+.ps-head .ps-title{font-family:var(--serif);font-size:22px;margin:6px 0 2px}
+.ps-head .ps-count{font-size:12.5px;color:var(--mid)}
+.ps-head .ps-count b{color:var(--black)}
+.ps-close{position:absolute;top:18px;right:20px;width:32px;height:32px;border:none;background:var(--off-white);border-radius:50%;font-size:17px;cursor:pointer;color:var(--mid)}
+.ps-close:hover{background:var(--divider);color:var(--black)}
+.ps-tools{display:flex;align-items:center;gap:10px;padding:12px 24px;border-bottom:1px solid var(--divider);background:var(--near-white)}
+.ps-tools select{min-width:0;font-size:12px;padding:6px 9px}
+.ps-tools .psearch{flex:1;font-size:12px;padding:6px 10px}
+.ps-export{font-size:11.5px;font-weight:500;color:#fff;background:var(--teal-deep);border:none;border-radius:30px;padding:7px 14px;cursor:pointer}
+.ps-export:hover{background:var(--teal-hover)}
+.ps-body{flex:1;overflow-y:auto;padding:8px 0}
+.ag-row{padding:13px 24px;border-bottom:1px solid var(--divider);display:flex;align-items:flex-start;gap:12px}
+.ag-row:hover{background:var(--near-white)}
+.ag-rank{font-size:11px;color:var(--muted);width:22px;flex:none;padding-top:2px;text-align:right;font-variant-numeric:tabular-nums}
+.ag-main{flex:1;min-width:0}
+.ag-nm{font-size:14px;font-weight:600}
+.ag-nm a{color:var(--black)}
+.ag-nm a:hover{color:var(--teal-deep)}
+.ag-meta{font-size:11.5px;color:var(--light);margin-top:2px}
+.ag-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:30px;white-space:nowrap}
+.b-premier{background:#efe7d2;color:#7a6a40}
+.b-qualified{background:#e0efe5;color:#1d6b4e}
+.b-review{background:#f0f0f0;color:#777}
+.b-excluded{background:#fbe3e3;color:#b23838}
+.b-je-yes{background:var(--teal-deep);color:#fff}
+.b-je-no{background:#f0f0f0;color:#888}
+.b-tier{background:#f4efe4;color:#8a774a}
+.b-neutral{background:var(--off-white);color:var(--mid)}
+.ag-stat{flex:none;text-align:right}
+.ag-stat .v{font-family:var(--serif);font-size:19px;line-height:1}
+.ag-stat .l{font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--light);margin-top:3px}
+.ps-empty{padding:50px 24px;text-align:center;color:var(--light);font-size:13px}
+
+@media(max-width:1100px){.kpis,.cs-grid{grid-template-columns:repeat(2,1fr)}.grid-3,.grid-2,.rec-grid{grid-template-columns:1fr}.funnel{flex-wrap:wrap}.fstep{flex:1 1 45%;border-right:none;border-bottom:1px solid var(--divider)}.fstep .arrow{display:none}.sec-head .desc{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hdr-inner">
+    <div>
+      <div class="brand">JAMES<span>EDITION</span> · Market Intelligence</div>
+      <div class="hdr-title">Agency acquisition &amp; supply coverage — <b id="m-scope">Andalucía / Málaga</b></div>
+    </div>
+    <div class="hdr-meta">
+      <span class="pill-demo">Demo · All Hands</span><br>
+      Source <b id="m-source">Idealista</b> · <b id="m-total">—</b> offices<br>
+      Snapshot <b>Jun 2026</b>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tabset">
+      <div class="tab active" data-tab="agency">Agency Intelligence</div>
+      <div class="tab" data-tab="listings">Listings Intelligence</div>
+    </div>
+    <div class="ds-wrap"><span class="ds-label">Dataset</span><select id="ds-switch" class="ds-switch"></select></div>
+  </div>
+</header>
+
+<div class="filters">
+  <div class="filters-inner">
+    <div class="fgroup"><span class="flabel">Region</span><select id="f-region"></select></div>
+    <div class="fgroup"><span class="flabel">Province</span><select id="f-prov"></select></div>
+    <div class="fgroup"><span class="flabel">ICP qualification</span><select id="f-icp">
+      <option value="">All</option><option>Premier</option><option>Qualified</option><option>Needs Review</option><option>Excluded</option></select></div>
+    <div class="fgroup"><span class="flabel">Luxury tier</span><select id="f-tier">
+      <option value="">All tiers</option><option value="ultra_luxury">Ultra luxury</option><option value="luxury">Luxury</option><option value="mid_luxury">Mid luxury</option><option value="non_luxury">Non luxury</option></select></div>
+    <div class="fgroup"><span class="flabel">JamesEdition status</span><select id="f-je">
+      <option value="">All</option><option value="0">Not on JE</option><option value="1">On JE</option></select></div>
+    <div class="fgroup"><span class="flabel">Luxury listings only</span><select id="f-lux">
+      <option value="">No</option><option value="1">Yes</option></select></div>
+    <div class="fgroup"><span class="flabel">Search agency</span><input class="searchbox" id="f-search" placeholder="Type a name…"></div>
+    <button class="btn-reset" id="reset">Reset filters</button>
+    <div class="fctx" id="fctx"></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ============ TAB A : AGENCY ============ -->
+  <div class="tabpane active" id="pane-agency">
+
+    <section>
+      <div class="sec-head"><h2>The Acquisition Funnel</h2><span class="gate-tag">Gate 1 → 2 → 3</span>
+        <span class="desc">Every office flows through three gates. <span class="hint">Click any stage to see the agencies.</span></span></div>
+      <div class="funnel" id="funnel"></div>
+    </section>
+
+    <section><div class="kpis" id="kpis"></div></section>
+
+    <section>
+      <div class="sec-head"><h2>Gate 1 — ICP Qualification</h2><span class="gate-tag">Gate 1</span>
+        <span class="desc">How well each office fits our ideal customer profile.</span></div>
+      <div class="grid-2">
+        <div class="panel"><h3>ICP segment breakdown <span class="clickable">click to drill</span></h3><div class="ph-sub">Share of offices by qualification tier</div>
+          <div class="chart-box"><canvas id="c-icp"></canvas></div></div>
+        <div class="panel"><h3>Segment detail</h3><div class="ph-sub">Counts and share — click a row to list agencies</div>
+          <ul class="statlist" id="icp-list"></ul></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="sec-head"><h2>Gate 2 — JamesEdition Presence</h2><span class="gate-tag">Gate 2</span>
+        <span class="desc">Already a customer? White space = opportunity.</span></div>
+      <div class="grid-3">
+        <div class="panel"><h3>Marketplace penetration <span class="clickable">click to drill</span></h3><div class="ph-sub">On JE vs. not yet on JE</div>
+          <div class="chart-box"><canvas id="c-je"></canvas></div></div>
+        <div class="panel" style="grid-column:span 2"><h3>Coverage by town <span class="clickable">click a bar</span></h3><div class="ph-sub">On JE (teal) vs. open opportunity (grey), top towns in scope</div>
+          <div class="chart-box"><canvas id="c-citycov"></canvas></div></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="sec-head"><h2>Gate 3 — Luxury Qualification</h2><span class="gate-tag">Gate 3</span>
+        <span class="desc">Offices carrying inventory at or above €1M.</span></div>
+      <div class="grid-3">
+        <div class="panel"><h3>Luxury listing depth <span class="clickable">click a bar</span></h3><div class="ph-sub">Offices by number of listings ≥ €1M</div>
+          <div class="chart-box"><canvas id="c-lux"></canvas></div></div>
+        <div class="panel"><h3>Luxury tier mix <span class="clickable">click to drill</span></h3><div class="ph-sub">ICP luxury tier across offices</div>
+          <div class="chart-box"><canvas id="c-tier"></canvas></div></div>
+        <div class="panel"><h3>Buyer audience <span class="clickable">click a bar</span></h3><div class="ph-sub">Primary buyer type served</div>
+          <div class="chart-box"><canvas id="c-buyer"></canvas></div></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="sec-head"><h2>Additional Qualification Gates</h2><span class="gate-tag">Roadmap</span>
+        <span class="desc">Further gates being wired into the pipeline.</span></div>
+      <div class="cs-grid" id="cs-grid"></div>
+    </section>
+  </div>
+
+  <!-- ============ TAB B : LISTINGS ============ -->
+  <div class="tabpane" id="pane-listings">
+
+    <section style="margin-top:30px">
+      <div class="note"><span class="ic">ⓘ</span><div>This view is built from the <b>office-level dataset</b> we have today: per-agency <b>estimated listing counts</b> and a hard count of <b>listings ≥ €1M</b>. Per-listing detail (exact price bands, property type, room counts) and JamesEdition's own live volume will populate once <b>BigQuery is connected</b> — those widgets are marked accordingly.</div></div>
+    </section>
+
+    <section><div class="kpis" id="l-kpis"></div></section>
+
+    <section>
+      <div class="sec-head"><h2>Supply Composition</h2><span class="gate-tag">Listings</span>
+        <span class="desc">Where the addressable inventory sits. <span class="hint">Click to see the agencies behind it.</span></span></div>
+      <div class="grid-2">
+        <div class="panel"><h3>Estimated listings by luxury segment <span class="clickable">click a bar</span></h3><div class="ph-sub">Sum of estimated listings, grouped by ICP luxury tier</div>
+          <div class="chart-box"><canvas id="l-seg"></canvas></div></div>
+        <div class="panel"><h3>Luxury inventory (≥ €1M) by segment <span class="clickable">click a bar</span></h3><div class="ph-sub">Hard count of €1M+ listings by luxury tier</div>
+          <div class="chart-box"><canvas id="l-luxseg"></canvas></div></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="sec-head"><h2>Coverage &amp; Gap by Province</h2><span class="gate-tag">Opportunity</span>
+        <span class="desc">Addressable competitor volume vs. JamesEdition presence.</span></div>
+      <div class="grid-2">
+        <div class="panel"><h3>Addressable listing volume by province <span class="clickable">click a bar</span></h3><div class="ph-sub">Estimated listings we can see on the competitor portal</div>
+          <div class="chart-box"><canvas id="l-prov"></canvas></div></div>
+        <div class="panel"><h3>Coverage gap by province</h3><div class="ph-sub">Competitor volume (left) vs. matched-on-JE volume — JE side connects via BigQuery</div>
+          <div class="chart-box"><canvas id="l-gap"></canvas></div>
+          <div class="note" style="margin-top:14px"><span class="ic">ⓘ</span><div><b>Absolute volume gap.</b> The competitor bar is real; JamesEdition's current matched volume will be pulled directly from BigQuery to compute the exact missing-listings count per province.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="sec-head"><h2>Inventory Concentration</h2><span class="gate-tag">Listings</span>
+        <span class="desc">Which offices hold the deepest portfolios.</span></div>
+      <div class="grid-2">
+        <div class="panel"><h3>Top offices by estimated portfolio <span class="clickable">click a bar</span></h3><div class="ph-sub">Largest estimated listing counts in scope (portals included)</div>
+          <div class="chart-box short" style="height:300px"><canvas id="l-top"></canvas></div></div>
+        <div class="panel"><h3>Top offices by luxury depth (≥ €1M) <span class="clickable">click a bar</span></h3><div class="ph-sub">Most €1M+ listings — your highest-value supply</div>
+          <div class="chart-box short" style="height:300px"><canvas id="l-toplux"></canvas></div></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="sec-head"><h2>Listing Dimensions In Progress</h2><span class="gate-tag">Roadmap</span>
+        <span class="desc">Unlocks with per-listing data from BigQuery.</span></div>
+      <div class="cs-grid" id="l-cs-grid"></div>
+    </section>
+  </div>
+
+  <!-- recommendations (shared) -->
+  <section>
+    <div class="recs">
+      <h2>Where This Goes Next</h2>
+      <div class="rsub">Recommended iterations after the All Hands demo</div>
+      <div class="rec-grid">
+        <div class="rec"><span class="step">01</span><h4>Connect BigQuery</h4><p>Pull JamesEdition's live listing volume and exact per-listing detail (price bands, property type, location) to turn estimated supply into precise coverage-gap and missing-listings numbers per province.</p></div>
+        <div class="rec"><span class="step">02</span><h4>Scale the geography</h4><p>Run the same gated pipeline across all of Andalucía, then Spain, then every JE market. Add Kyero and other portals, de-duplicating offices across sources.</p></div>
+        <div class="rec"><span class="step">03</span><h4>Make it actionable</h4><p>Push prime targets straight into HubSpot with owner assignment and contact enrichment, plus a weekly "new luxury offices" alert for the sales team.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    JamesEdition · Sales &amp; Market Intelligence — demo prototype on competitor-scraped data (Idealista, Málaga province). Listing figures are agency-level estimates and refine once BigQuery is connected. Not for external distribution.
+  </footer>
+</div>
+
+<!-- ===== Side panel ===== -->
+<div class="scrim" id="scrim"></div>
+<aside class="panel-side" id="side">
+  <div class="ps-head">
+    <button class="ps-close" id="ps-close">×</button>
+    <div class="ps-eyebrow" id="ps-eyebrow">Agencies</div>
+    <div class="ps-title" id="ps-title">—</div>
+    <div class="ps-count"><b id="ps-count">0</b> <span id="ps-count-label">agencies</span> · <span id="ps-context"></span></div>
+  </div>
+  <div class="ps-tools">
+    <input class="psearch searchbox" id="ps-search" placeholder="Filter this list…">
+    <select id="ps-sort">
+      <option value="g3">Sort: Listings ≥€1M</option>
+      <option value="est">Sort: Estimated listings</option>
+      <option value="g4">Sort: Overlap score</option>
+      <option value="name">Sort: Name (A–Z)</option>
+    </select>
+    <button class="ps-export" id="ps-export">Export CSV</button>
+  </div>
+  <div class="ps-body" id="ps-body"></div>
+</aside>
+
+<script>
+let DATA, ROWS, AGG;
+const fmt = n => n==null?'—':Math.round(n).toLocaleString('en-US');
+const COL = {teal:'#006C75',tealL:'#0ebab4',gold:'#b9a16f',goldL:'#dfd5c0',green:'#178475',grey:'#d8d8d8',mid:'#878787'};
+Chart.defaults.font.family="'Inter',Arial,sans-serif";Chart.defaults.font.size=12;Chart.defaults.color='#606060';
+
+const icpClass={'Premier':'b-premier','Qualified':'b-qualified','Needs Review':'b-review','Excluded':'b-excluded'};
+const icpColor={'Premier':COL.gold,'Qualified':COL.green,'Needs Review':COL.grey,'Excluded':'#e8b4b4'};
+const tierLabel={ultra_luxury:'Ultra luxury',luxury:'Luxury',mid_luxury:'Mid luxury',non_luxury:'Non luxury',Unknown:'Unknown'};
+const tierColor={ultra_luxury:'#b9a16f',luxury:'#cdb98a',mid_luxury:'#dfd5c0',non_luxury:'#d8d8d8',Unknown:'#efefef'};
+
+let state={region:'',prov:'',icp:'',tier:'',je:'',lux:'',q:''};
+let tab='agency';
+const charts={};
+const isQual=r=>r.g1===1||r.g1===2, isLux=r=>r.g3>=1, notJE=r=>r.g2===0;
+
+/* ---- filter option population (cascading) ---- */
+function uniq(arr){return [...new Set(arr)].filter(Boolean).sort();}
+function buildRegion(){
+  const sel=document.getElementById('f-region');
+  sel.innerHTML='<option value="">All regions</option>'+uniq(ROWS.map(r=>r.region)).map(r=>`<option>${r}</option>`).join('');
+}
+function buildProv(){
+  const sel=document.getElementById('f-prov');
+  const pool=state.region?ROWS.filter(r=>r.region===state.region):ROWS;
+  sel.innerHTML='<option value="">All provinces</option>'+uniq(pool.map(r=>r.province)).map(p=>`<option>${p}</option>`).join('');
+  if(![...sel.options].some(o=>o.value===state.prov)) {state.prov='';sel.value='';}
+}
+/* ---- base filter (everything except the drill predicate) ---- */
+function filtered(){
+  return ROWS.filter(r=>{
+    if(state.region && r.region!==state.region) return false;
+    if(state.prov && r.province!==state.prov) return false;
+    if(state.icp && r.icp!==state.icp) return false;
+    if(state.tier && r.tier!==state.tier) return false;
+    if(state.je!=='' && String(r.g2)!==state.je) return false;
+    if(state.lux==='1' && !isLux(r)) return false;
+    if(state.q && !(r.name||'').toLowerCase().includes(state.q.toLowerCase())) return false;
+    return true;
+  });
+}
+function compute(rows){
+  const total=rows.length;
+  const c={total,
+    premier:rows.filter(r=>r.g1===1).length,qualified:rows.filter(r=>r.g1===2).length,
+    review:rows.filter(r=>r.g1===3).length,excluded:rows.filter(r=>r.g1===4).length,
+    onJE:rows.filter(r=>r.g2===1).length,notJE:rows.filter(r=>r.g2===0).length,
+    withLux:rows.filter(isLux).length,luxListings:rows.reduce((s,r)=>s+(r.g3||0),0),
+    qual:rows.filter(isQual).length,
+    est:rows.reduce((s,r)=>s+(r.est||0),0),
+    estCore:rows.filter(r=>!r.portal).reduce((s,r)=>s+(r.est||0),0)};
+  c.qualNotJE=rows.filter(r=>isQual(r)&&notJE(r)).length;
+  c.prime=rows.filter(r=>isQual(r)&&notJE(r)&&isLux(r)).length;
+  c.pen=total?Math.round(c.onJE/total*1000)/10:0;
+  c.qualPct=total?Math.round(c.qual/total*100):0;
+  return c;
+}
+
+/* ================= SIDE PANEL ================= */
+let panelRows=[],panelMeta={};
+function openPanel(title,eyebrow,predicate,context){
+  const base=filtered();
+  panelRows=base.filter(predicate);
+  panelMeta={title,eyebrow,context:context||''};
+  document.getElementById('ps-eyebrow').textContent=eyebrow||'Agencies';
+  document.getElementById('ps-title').textContent=title;
+  document.getElementById('ps-context').textContent=context||'';
+  document.getElementById('ps-search').value='';
+  renderPanelList();
+  document.getElementById('scrim').classList.add('open');
+  document.getElementById('side').classList.add('open');
+}
+function closePanel(){document.getElementById('scrim').classList.remove('open');document.getElementById('side').classList.remove('open');}
+function renderPanelList(){
+  const q=document.getElementById('ps-search').value.toLowerCase();
+  const sort=document.getElementById('ps-sort').value;
+  let list=panelRows.filter(r=>!q||(r.name||'').toLowerCase().includes(q));
+  list.sort((a,b)=>{
+    if(sort==='name')return (a.name||'').localeCompare(b.name||'');
+    const va=a[sort]==null?-1:a[sort],vb=b[sort]==null?-1:b[sort];return vb-va;});
+  document.getElementById('ps-count').textContent=fmt(list.length);
+  const body=document.getElementById('ps-body');
+  if(!list.length){body.innerHTML='<div class="ps-empty">No agencies match this selection.</div>';return;}
+  body.innerHTML=list.slice(0,300).map((r,i)=>{
+    const icp=r.icp?`<span class="badge ${icpClass[r.icp]||'b-review'}">${r.icp}</span>`:'';
+    const je=r.g2===1?'<span class="badge b-je-yes">On JE</span>':'<span class="badge b-je-no">Open</span>';
+    const tier=r.tier?`<span class="badge b-tier">${tierLabel[r.tier]||r.tier}</span>`:'';
+    const nm=r.url?`<a href="${r.url}" target="_blank" rel="noopener">${r.name||'—'}</a>`:(r.name||'—');
+    return `<div class="ag-row"><div class="ag-rank">${i+1}</div>
+      <div class="ag-main"><div class="ag-nm">${nm}</div>
+        <div class="ag-meta">${r.city||'—'} · ${(r.model||'').replace(/_/g,' ')||'—'}${r.g4?` · overlap ${r.g4.toFixed(2)}`:''}</div>
+        <div class="ag-tags">${icp}${tier}${je}</div></div>
+      <div class="ag-stat"><div class="v">${r.g3==null?'—':fmt(r.g3)}</div><div class="l">≥€1M</div>
+        <div class="v" style="font-size:13px;margin-top:8px;color:#606060">${r.est==null?'—':fmt(r.est)}</div><div class="l">est. total</div></div>
+    </div>`;}).join('')+(list.length>300?`<div class="ps-empty">Showing first 300 of ${fmt(list.length)}. Refine filters or export for the full list.</div>`:'');
+}
+function exportCSV(){
+  const q=document.getElementById('ps-search').value.toLowerCase();
+  let list=panelRows.filter(r=>!q||(r.name||'').toLowerCase().includes(q));
+  const hdr=['Agency','City','Region','Province','ICP','Luxury tier','Model','On JE','Listings >=1M','Est listings','Overlap','URL'];
+  const esc=v=>`"${(v==null?'':String(v)).replace(/"/g,'""')}"`;
+  const lines=[hdr.join(',')].concat(list.map(r=>[r.name,r.city,r.region,r.province,r.icp,r.tier,r.model,r.g2===1?'Yes':'No',r.g3,r.est,r.g4,r.url].map(esc).join(',')));
+  const blob=new Blob([lines.join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='je_agencies_'+(panelMeta.title||'list').replace(/[^a-z0-9]+/gi,'_').toLowerCase()+'.csv';a.click();
+}
+document.getElementById('ps-close').onclick=closePanel;
+document.getElementById('scrim').onclick=closePanel;
+document.getElementById('ps-search').oninput=renderPanelList;
+document.getElementById('ps-sort').onchange=renderPanelList;
+document.getElementById('ps-export').onclick=exportCSV;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePanel();});
+
+/* ================= CHART HELPERS ================= */
+function donut(id,labels,vals,colors,onClick){
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart(document.getElementById(id),{type:'doughnut',
+    data:{labels,datasets:[{data:vals,backgroundColor:colors,borderWidth:2,borderColor:'#fff'}]},
+    options:{cutout:'62%',onClick:(e,el)=>{if(el.length&&onClick)onClick(el[0].index);},
+      onHover:(e,el)=>{e.native.target.style.cursor=el.length?'pointer':'default';},
+      plugins:{legend:{position:'right',labels:{boxWidth:10,boxHeight:10,padding:11,font:{size:12}}},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${fmt(ctx.raw)}`}}},maintainAspectRatio:false}});
+}
+function bar(id,labels,datasets,opts={}){
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets},
+    options:{indexAxis:opts.horiz?'y':'x',maintainAspectRatio:false,
+      onClick:(e,el)=>{if(el.length&&opts.onClick)opts.onClick(el[0].index);},
+      onHover:(e,el)=>{e.native.target.style.cursor=el.length&&opts.onClick?'pointer':'default';},
+      plugins:{legend:{display:opts.legend||false,labels:{boxWidth:10,padding:10}},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label||ctx.label}: ${fmt(ctx.raw)}`}}},
+      scales:{x:{stacked:opts.stacked||false,grid:{display:!opts.horiz,color:'#f0f0f0'},ticks:{font:{size:11}}},
+              y:{stacked:opts.stacked||false,grid:{display:opts.horiz,color:'#f0f0f0'},ticks:{font:{size:11}},beginAtZero:true}}}});
+}
+
+/* ================= AGENCY TAB ================= */
+function renderFunnel(rows,c){
+  const steps=[
+    {cap:'All offices',num:c.total,desc:'Scraped from Idealista in scope',pct:'100%',pred:()=>true,ttl:'All offices in scope'},
+    {cap:'Gate 1 · Qualified ICP',num:c.qual,desc:'Premier + Qualified fit',pct:c.total?Math.round(c.qual/c.total*100)+'% of all':'—',pred:isQual,ttl:'Qualified offices (Premier + Qualified)'},
+    {cap:'Gate 2 · Not yet on JE',num:c.qualNotJE,desc:'Qualified & not a JE customer',pct:c.qual?Math.round(c.qualNotJE/c.qual*100)+'% of qualified':'—',pred:r=>isQual(r)&&notJE(r),ttl:'Qualified & not on JamesEdition'},
+    {cap:'Gate 3 · Luxury inventory',num:c.prime,desc:'≥1 listing at €1M+ — prime targets',pct:c.qualNotJE?Math.round(c.prime/c.qualNotJE*100)+'% of those':'—',final:true,pred:r=>isQual(r)&&notJE(r)&&isLux(r),ttl:'Prime acquisition targets'},
+  ];
+  const el=document.getElementById('funnel');
+  el.innerHTML=steps.map((s,i)=>`<div class="fstep ${s.final?'final':''}" data-i="${i}">
+      <div class="fcap">${s.cap}</div><div class="fnum">${fmt(s.num)}</div>
+      <div class="fdesc">${s.desc}</div><div class="fpct">${s.pct}</div><div class="arrow"></div></div>`).join('');
+  el.querySelectorAll('.fstep').forEach(d=>{const s=steps[+d.dataset.i];
+    d.onclick=()=>openPanel(s.ttl,'Funnel · '+s.cap,s.pred,scopeLabel());});
+}
+function renderKPIs(c){
+  const cards=[
+    {cls:'g1',l:'Gate 1 · Total offices',v:fmt(c.total),s:`<b>${fmt(c.qual)}</b> qualified (${c.qualPct}%) · ${fmt(c.premier)} Premier`,pred:()=>true,ttl:'All offices in scope'},
+    {cls:'g2',l:'Gate 2 · JE penetration',v:c.pen+'%',s:`<b>${fmt(c.onJE)}</b> on JE · <b>${fmt(c.notJE)}</b> open`,pred:notJE,ttl:'Offices not yet on JamesEdition'},
+    {cls:'g3',l:'Gate 3 · Luxury offices',v:fmt(c.withLux),s:`<b>${fmt(c.luxListings)}</b> listings ≥ €1M`,pred:isLux,ttl:'Offices with ≥1 luxury listing'},
+    {cls:'prime',l:'Prime acquisition targets',v:fmt(c.prime),s:`Qualified · not on JE · luxury`,pred:r=>isQual(r)&&notJE(r)&&isLux(r),ttl:'Prime acquisition targets'},
+  ];
+  const wrap=document.getElementById('kpis');
+  wrap.innerHTML=cards.map((k,i)=>`<div class="kpi ${k.cls}" data-i="${i}"><div class="klabel">${k.l}</div>
+     <div class="kval">${k.v}</div><div class="ksub">${k.s}</div><div class="kgo">View agencies →</div></div>`).join('');
+  wrap.querySelectorAll('.kpi').forEach(d=>{const k=cards[+d.dataset.i];d.onclick=()=>openPanel(k.ttl,'KPI · '+k.l,k.pred,scopeLabel());});
+}
+function renderAgencyCharts(rows,c){
+  donut('c-icp',['Premier','Qualified','Needs Review','Excluded'],
+    [c.premier,c.qualified,c.review,c.excluded],
+    [icpColor.Premier,icpColor.Qualified,icpColor['Needs Review'],icpColor.Excluded],
+    idx=>{const lab=['Premier','Qualified','Needs Review','Excluded'][idx];openPanel(lab+' offices','Gate 1 · ICP',r=>r.icp===lab,scopeLabel());});
+  const segs=[['Premier',c.premier,icpColor.Premier],['Qualified',c.qualified,icpColor.Qualified],['Needs Review',c.review,icpColor['Needs Review']],['Excluded',c.excluded,icpColor.Excluded]];
+  const ul=document.getElementById('icp-list');
+  ul.innerHTML=segs.map(([n,v,col])=>`<li data-n="${n}"><span class="nm"><span class="dot" style="background:${col}"></span>${n}</span>
+     <span class="vv">${fmt(v)}<small>${c.total?Math.round(v/c.total*100):0}%</small></span></li>`).join('');
+  ul.querySelectorAll('li').forEach(li=>li.onclick=()=>{const n=li.dataset.n;openPanel(n+' offices','Gate 1 · ICP',r=>r.icp===n,scopeLabel());});
+
+  donut('c-je',['On JamesEdition','Not yet on JE'],[c.onJE,c.notJE],[COL.teal,COL.grey],
+    idx=>{if(idx===0)openPanel('Offices on JamesEdition','Gate 2',r=>r.g2===1,scopeLabel());else openPanel('Offices not yet on JE','Gate 2',notJE,scopeLabel());});
+
+  const cityAgg={};rows.forEach(r=>{const k=r.city||'—';(cityAgg[k]=cityAgg[k]||{on:0,off:0});r.g2===1?cityAgg[k].on++:cityAgg[k].off++;});
+  const top=Object.entries(cityAgg).sort((a,b)=>(b[1].on+b[1].off)-(a[1].on+a[1].off)).slice(0,10);
+  bar('c-citycov',top.map(x=>x[0]),
+    [{label:'On JE',data:top.map(x=>x[1].on),backgroundColor:COL.teal},{label:'Open',data:top.map(x=>x[1].off),backgroundColor:COL.grey}],
+    {stacked:true,legend:true,onClick:idx=>{const city=top[idx][0];openPanel(city+' — offices','Gate 2 · Town',r=>(r.city||'—')===city,scopeLabel());}});
+
+  const ranges=[['0',r=>r.g3===0],['1–5',r=>r.g3>=1&&r.g3<=5],['6–20',r=>r.g3>5&&r.g3<=20],['21–50',r=>r.g3>20&&r.g3<=50],['50+',r=>r.g3>50]];
+  bar('c-lux',ranges.map(x=>x[0]),[{label:'Offices',data:ranges.map(x=>rows.filter(r=>r.g3!=null&&x[1](r)).length),
+    backgroundColor:[COL.grey,COL.goldL,COL.gold,'#a08a55','#6f5f38']}],
+    {onClick:idx=>{const[lbl,pr]=ranges[idx];openPanel('Offices with '+lbl+' listings ≥€1M','Gate 3 · Depth',r=>r.g3!=null&&pr(r),scopeLabel());}});
+
+  const tier={};rows.forEach(r=>{const k=r.tier||'Unknown';tier[k]=(tier[k]||0)+1;});
+  const tO=['ultra_luxury','luxury','mid_luxury','non_luxury','Unknown'].filter(k=>tier[k]);
+  donut('c-tier',tO.map(k=>tierLabel[k]),tO.map(k=>tier[k]),tO.map(k=>tierColor[k]),
+    idx=>{const k=tO[idx];openPanel(tierLabel[k]+' offices','Gate 3 · Tier',r=>(r.tier||'Unknown')===k,scopeLabel());});
+
+  const by={};rows.forEach(r=>{const k=r.buyers||'Unknown';by[k]=(by[k]||0)+1;});
+  const bO=Object.entries(by).sort((a,b)=>b[1]-a[1]);
+  bar('c-buyer',bO.map(b=>b[0].replace(/_/g,' ')),[{label:'Offices',data:bO.map(b=>b[1]),backgroundColor:COL.teal}],
+    {horiz:true,onClick:idx=>{const k=bO[idx][0];openPanel(k.replace(/_/g,' ')+' — offices','Gate 3 · Buyers',r=>(r.buyers||'Unknown')===k,scopeLabel());}});
+}
+function renderComingSoon(){
+  const g4=AGG.gate4;
+  const cards=[
+    {g:'Gate 4',t:'Listing Overlap Score',st:'prog',stl:'In progress',body:`How much an office's inventory already overlaps with JE listings.`,partial:`<div class="partial"><b>${fmt(g4.withOverlap)}</b> offices with measurable overlap · avg ${g4.avg}</div>`},
+    {g:'Gate 5',t:'Network / MLS Detection',st:'soon',stl:'Coming soon',body:`Flags franchises, networks and MLS feeds to avoid double-counting and target head offices.`},
+    {g:'Gate 6',t:'Scraping Qualification',st:'prog',stl:'In progress',body:`Can we reliably scrape this office's own website for richer, fresher inventory?`,partial:`<div class="partial"><b>246</b> offices scored so far</div>`},
+    {g:'Gate 7',t:'Est. Website Listings',st:'soon',stl:'Coming soon',body:`True portfolio size from the office's own site — beyond what's on Idealista.`},
+  ];
+  document.getElementById('cs-grid').innerHTML=cards.map(c=>`<div class="cs"><div class="csg">${c.g}</div><h4>${c.t}</h4><p>${c.body}</p>${c.partial||''}<span class="status ${c.st==='prog'?'st-prog':'st-soon'}">${c.stl}</span></div>`).join('');
+}
+
+/* ================= LISTINGS TAB ================= */
+function renderListings(rows,c){
+  document.getElementById('l-kpis').innerHTML=[
+    {l:'Estimated listings in scope',v:fmt(c.est),s:`<b>${fmt(c.estCore)}</b> excl. portal aggregators`},
+    {l:'Luxury listings ≥ €1M',v:fmt(c.luxListings),s:`across <b>${fmt(c.withLux)}</b> offices`},
+    {l:'Offices with inventory',v:fmt(rows.filter(r=>r.est).length),s:`median <b>${AGG.estMedian}</b> listings / office`},
+    {l:'Luxury share of offices',v:(c.total?Math.round(c.withLux/c.total*100):0)+'%',s:`carry ≥1 listing at €1M+`},
+  ].map(k=>`<div class="kpi nc g3"><div class="klabel">${k.l}</div><div class="kval">${k.v}</div><div class="ksub">${k.s}</div></div>`).join('');
+
+  // by luxury segment (estimated)
+  const segOrder=['ultra_luxury','luxury','mid_luxury','non_luxury','Unknown'];
+  const segEst={},segLux={};rows.forEach(r=>{const k=r.tier||'Unknown';segEst[k]=(segEst[k]||0)+(r.est||0);segLux[k]=(segLux[k]||0)+(r.g3||0);});
+  const sO=segOrder.filter(k=>segEst[k]||segLux[k]);
+  bar('l-seg',sO.map(k=>tierLabel[k]),[{label:'Est. listings',data:sO.map(k=>segEst[k]||0),backgroundColor:sO.map(k=>tierColor[k])}],
+    {onClick:idx=>{const k=sO[idx];openPanel(tierLabel[k]+' — offices','Listings · Segment',r=>(r.tier||'Unknown')===k,scopeLabel());}});
+  bar('l-luxseg',sO.map(k=>tierLabel[k]),[{label:'Listings ≥€1M',data:sO.map(k=>segLux[k]||0),backgroundColor:sO.map(k=>tierColor[k])}],
+    {onClick:idx=>{const k=sO[idx];openPanel(tierLabel[k]+' — offices with €1M+ listings','Listings · Luxury',r=>(r.tier||'Unknown')===k&&isLux(r),scopeLabel());}});
+
+  // by province (addressable)
+  const prov={};rows.forEach(r=>{const k=r.province||'—';prov[k]=(prov[k]||0)+(r.est||0);});
+  const pO=Object.entries(prov).sort((a,b)=>b[1]-a[1]);
+  bar('l-prov',pO.map(p=>p[0]),[{label:'Est. listings',data:pO.map(p=>p[1]),backgroundColor:COL.teal}],
+    {horiz:true,onClick:idx=>{const k=pO[idx][0];openPanel(k+' — offices','Listings · Province',r=>(r.province||'—')===k,scopeLabel());}});
+
+  // coverage gap: competitor vs JE (JE pending) — show competitor real, JE as 0/pending
+  bar('l-gap',pO.map(p=>p[0]),
+    [{label:'Competitor (addressable)',data:pO.map(p=>p[1]),backgroundColor:COL.teal},
+     {label:'Matched on JE (pending BQ)',data:pO.map(()=>0),backgroundColor:COL.goldL}],
+    {legend:true});
+
+  // top offices by est portfolio
+  const byEst=[...rows].filter(r=>r.est).sort((a,b)=>b.est-a.est).slice(0,12);
+  bar('l-top',byEst.map(r=>r.name),[{label:'Est. listings',data:byEst.map(r=>r.est),backgroundColor:byEst.map(r=>r.portal?COL.muted||'#c9c0a8':COL.teal)}],
+    {horiz:true,onClick:idx=>{const r=byEst[idx];openPanel(r.name,'Listings · Office',x=>x.name===r.name,scopeLabel());}});
+  const byLux=[...rows].filter(r=>r.g3>=1).sort((a,b)=>b.g3-a.g3).slice(0,12);
+  bar('l-toplux',byLux.map(r=>r.name),[{label:'Listings ≥€1M',data:byLux.map(r=>r.g3),backgroundColor:byLux.map(r=>r.tier==='ultra_luxury'?COL.gold:'#a08a55')}],
+    {horiz:true,onClick:idx=>{const r=byLux[idx];openPanel(r.name,'Listings · Office',x=>x.name===r.name,scopeLabel());}});
+
+  document.getElementById('l-cs-grid').innerHTML=[
+    {t:'Listings by price range',body:'€1M–2M, €2M–5M, €5M+ distribution per market.'},
+    {t:'Listings by property type',body:'Villa, apartment, penthouse, plot, commercial split.'},
+    {t:'Missing listings by province',body:'Exact count of competitor listings absent from JE.'},
+    {t:'Listing freshness & churn',body:'New, updated and delisted inventory over time.'},
+  ].map(c=>`<div class="cs"><div class="csg">Needs BigQuery</div><h4>${c.t}</h4><p>${c.body}</p><span class="status st-soon">Coming soon</span></div>`).join('');
+}
+
+/* ---- scope label for panel context ---- */
+function scopeLabel(){
+  const bits=[];
+  bits.push(state.prov||state.region||'Andalucía · Málaga');
+  if(state.icp)bits.push('ICP: '+state.icp);
+  if(state.tier)bits.push(tierLabel[state.tier]);
+  if(state.je!=='')bits.push(state.je==='1'?'On JE':'Not on JE');
+  if(state.lux==='1')bits.push('Luxury only');
+  return bits.join(' · ');
+}
+
+/* ---- master render ---- */
+function renderAll(){
+  const rows=filtered();const c=compute(rows);
+  // context line
+  document.getElementById('fctx').innerHTML=`<b>${fmt(rows.length)}</b> offices in scope`;
+  if(tab==='agency'){renderFunnel(rows,c);renderKPIs(c);renderAgencyCharts(rows,c);}
+  else{renderListings(rows,c);}
+}
+
+/* ---- events ---- */
+document.getElementById('f-region').onchange=e=>{state.region=e.target.value;buildProv();renderAll();};
+document.getElementById('f-prov').onchange=e=>{state.prov=e.target.value;renderAll();};
+document.getElementById('f-icp').onchange=e=>{state.icp=e.target.value;renderAll();};
+document.getElementById('f-tier').onchange=e=>{state.tier=e.target.value;renderAll();};
+document.getElementById('f-je').onchange=e=>{state.je=e.target.value;renderAll();};
+document.getElementById('f-lux').onchange=e=>{state.lux=e.target.value;renderAll();};
+document.getElementById('f-search').oninput=e=>{state.q=e.target.value;renderAll();};
+document.getElementById('reset').onclick=()=>{state={region:'',prov:'',icp:'',tier:'',je:'',lux:'',q:''};
+  buildProv();['f-region','f-prov','f-icp','f-tier','f-je','f-lux'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-search').value='';renderAll();};
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  tab=t.dataset.tab;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');
+  document.querySelectorAll('.tabpane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pane-'+tab).classList.add('active');closePanel();renderAll();});
+
+function boot(){buildRegion();buildProv();renderComingSoon();renderAll();}
+
+// ---- multi-dataset loader: embedded (file://) or fetched (server / Pages) ----
+var EMB = window.__PI_EMBED__ || null;
+function fetchJSON(path){
+  if(EMB){
+    if(path.indexOf('datasets.json')>=0) return Promise.resolve(EMB.manifest);
+    var file=path.split('/').pop();
+    if(EMB.data[file]) return Promise.resolve(EMB.data[file]);
+    return Promise.reject(new Error('embedded dataset missing: '+file));
+  }
+  return fetch(path).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();});
+}
+function applyScope(){
+  document.getElementById('m-total').textContent=fmt(AGG.total);
+  var src=document.getElementById('m-source'); if(src&&AGG.portal)src.textContent=AGG.portal;
+  var sc=document.getElementById('m-scope'); if(sc)sc.textContent=(AGG.region||'')+(AGG.province?' / '+AGG.province:'');
+}
+function resetFilters(){
+  state={region:'',prov:'',icp:'',tier:'',je:'',lux:'',q:''};
+  ['f-region','f-prov','f-icp','f-tier','f-je','f-lux'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  var s=document.getElementById('f-search'); if(s)s.value='';
+}
+function loadDataset(file){
+  return fetchJSON('./'+file).then(function(d){
+    DATA=d;ROWS=d.rows;AGG=d.agg;applyScope();resetFilters();closePanel();boot();
+  });
+}
+function showLoadError(err){
+  document.querySelector('.wrap').innerHTML=
+    '<div style="max-width:680px;margin:60px auto;padding:28px;background:#fff;border:1px solid #ececec;border-radius:6px;font-family:Inter,Arial,sans-serif">'
+    +'<h2 style="font-family:Prata,serif;font-weight:400">Could not load dataset</h2>'
+    +'<p style="color:#606060;line-height:1.6">This dashboard reads its data files via fetch, which browsers block when you open <code>index.html</code> directly (<code>file://</code>). Serve it over HTTP instead:</p>'
+    +'<pre style="background:#f5f5f5;padding:14px;border-radius:4px">cd portal-intelligence\npython3 -m http.server 8080\n# then open http://localhost:8080</pre>'
+    +'<p style="color:#878787;font-size:12px">On GitHub Pages it works automatically. Detail: '+err+'</p></div>';
+}
+fetchJSON('./datasets.json').then(function(m){
+  var sel=document.getElementById('ds-switch');
+  var ds=(m&&m.datasets)||[];
+  sel.innerHTML=ds.map(function(d){return '<option value="'+d.file+'">'+d.label+'</option>';}).join('');
+  var def=ds.filter(function(d){return d.default;})[0]||ds[0];
+  if(!def) throw new Error('no datasets in manifest');
+  sel.value=def.file;
+  sel.onchange=function(e){loadDataset(e.target.value).catch(showLoadError);};
+  return loadDataset(def.file);
+}).catch(showLoadError);
+</script>
+</body>
+</html>

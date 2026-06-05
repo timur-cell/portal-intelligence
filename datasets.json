@@ -1,0 +1,5 @@
+{
+  "datasets": [
+    { "id": "es-malaga", "country": "Spain", "region": "Andalucía", "label": "Spain · Málaga (Idealista)", "file": "es-malaga.json", "default": true }
+  ]
+}
