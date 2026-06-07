@@ -40,16 +40,105 @@ def load_from_excel(path: str) -> pd.DataFrame:
     return pd.read_excel(path)
 
 
-def load_from_bigquery() -> pd.DataFrame:
-    """PRODUCTION TODO.
-    Replace with a query against the offices table once BigQuery is connected,
-    returning the same columns this script expects (see Gate mapping above).
-    Example:
-        from google.cloud import bigquery
-        client = bigquery.Client(project="jamesedition-152413")
-        return client.query(SQL).to_dataframe()
+# --- BigQuery production loader --------------------------------------------
+# Maps the snake_case columns the SQL returns -> the exact column names build()
+# already consumes (kept identical to the Excel export, so build() is unchanged).
+BQ_COLUMN_MAP = {
+    "office_name":            "Portal Office Name",
+    "office_url":             "Portal URL",
+    "city":                   "City",
+    "region":                 "Region",
+    "province":               "Province",
+    "g1_icp_qualification":   "Gate 1: ICP Qualification",
+    "icp_label":              "ICP Label",
+    "g2_on_jamesedition":     "Gate 2: JE Duplicate",
+    "g3_listings_ge_1m":      "Gate 3: # Listings ≥ 1M€",
+    "g4_overlap_score":       "Gate 4: Listings Overlap Score",
+    "icp_luxury_tier":        "ICP Luxury Tier",
+    "icp_model":              "ICP Model",
+    "icp_franchise":          "ICP Franchise",
+    "icp_buyer_types":        "ICP Buyer Types",
+    "icp_estimated_listings": "ICP Estimated Listings",
+    "icp_years_operating":    "ICP Years Operating",
+}
+
+# Office-level query. TODO(data-eng): replace the *_TABLE placeholders with the
+# real fully-qualified tables. The shape it returns must match BQ_COLUMN_MAP.
+# Each competitor office becomes one row; gates are computed here in SQL so the
+# Python side stays a thin transform.
+BQ_OFFICE_SQL = """
+WITH listings AS (              -- one row per scraped competitor listing
+  SELECT
+    office_id,
+    price_eur,
+    -- a listing counts as "luxury" at/above the €1M threshold
+    IF(price_eur >= 1000000, 1, 0) AS is_lux
+  FROM `{project}.{dataset}.LISTINGS_TABLE`
+  WHERE portal = @portal
+    AND (@province IS NULL OR province = @province)
+),
+listing_agg AS (
+  SELECT
+    office_id,
+    COUNT(*)                         AS est_listings,     -- exact, not estimated, once BQ is live
+    SUM(is_lux)                      AS listings_ge_1m
+  FROM listings
+  GROUP BY office_id
+),
+je_match AS (                   -- offices already present on JamesEdition
+  SELECT DISTINCT office_id, 1 AS on_je
+  FROM `{project}.{dataset}.JE_OFFICE_MATCH_TABLE`
+)
+SELECT
+  o.name                              AS office_name,
+  o.url                               AS office_url,
+  o.city                              AS city,
+  o.region                            AS region,
+  o.province                          AS province,
+  o.icp_qualification                 AS g1_icp_qualification,   -- 1..4
+  o.icp_label                         AS icp_label,
+  COALESCE(j.on_je, 0)                AS g2_on_jamesedition,      -- 1/0
+  la.listings_ge_1m                   AS g3_listings_ge_1m,
+  o.overlap_score                     AS g4_overlap_score,        -- 0..1
+  o.luxury_tier                       AS icp_luxury_tier,
+  o.business_model                    AS icp_model,
+  o.is_franchise                      AS icp_franchise,           -- 1/0
+  o.buyer_types                       AS icp_buyer_types,
+  la.est_listings                     AS icp_estimated_listings,
+  o.years_operating                   AS icp_years_operating
+FROM `{project}.{dataset}.OFFICES_TABLE` o
+LEFT JOIN listing_agg la USING (office_id)
+LEFT JOIN je_match     j  USING (office_id)
+WHERE o.portal = @portal
+  AND (@province IS NULL OR o.province = @province)
+"""
+
+
+def load_from_bigquery(project=None, dataset=None, portal="Idealista",
+                       province=None, location="EU") -> pd.DataFrame:
+    """Production loader. Returns a DataFrame with the same columns build() expects.
+
+    Auth comes from the environment (ADC / GOOGLE_APPLICATION_CREDENTIALS or a
+    workload-identity / CI secret) — never hardcode a key. Config via flags or
+    env: BQ_PROJECT, BQ_DATASET.
     """
-    raise NotImplementedError("Wire up BigQuery here — see HANDOVER.md.")
+    from google.cloud import bigquery  # lazy import: keeps the Excel path dependency-free
+
+    project = project or os.environ.get("BQ_PROJECT", "jamesedition-152413")
+    dataset = dataset or os.environ.get("BQ_DATASET", "market_intelligence")
+    client = bigquery.Client(project=project)
+    job_config = bigquery.QueryJobConfig(query_parameters=[
+        bigquery.ScalarQueryParameter("portal", "STRING", portal),
+        bigquery.ScalarQueryParameter("province", "STRING", province),
+    ])
+    sql = BQ_OFFICE_SQL.format(project=project, dataset=dataset)
+    df = client.query(sql, job_config=job_config, location=location).to_dataframe()
+
+    missing = [c for c in BQ_COLUMN_MAP if c not in df.columns]
+    if missing:
+        raise ValueError(f"BigQuery result is missing expected columns: {missing}. "
+                         "Check the SELECT aliases against BQ_COLUMN_MAP.")
+    return df.rename(columns=BQ_COLUMN_MAP)
 
 
 def build(df: pd.DataFrame) -> dict:
@@ -147,9 +236,19 @@ def main():
                     help="Mark this dataset as the one loaded first.")
     ap.add_argument("--out", default=None,
                     help="Override output path (default: <data-dir>/<dataset-id>.json).")
+    # BigQuery options (only used when --source bigquery). Auth via ADC / env — no keys here.
+    ap.add_argument("--bq-project", default=None, help="GCP project (or env BQ_PROJECT).")
+    ap.add_argument("--bq-dataset", default=None, help="BigQuery dataset (or env BQ_DATASET).")
+    ap.add_argument("--portal", default="Idealista", help="Competitor portal to pull.")
+    ap.add_argument("--bq-province", default=None,
+                    help="Optional province filter for the BigQuery pull.")
     args = ap.parse_args()
 
-    df = load_from_bigquery() if args.source == "bigquery" else load_from_excel(args.input)
+    if args.source == "bigquery":
+        df = load_from_bigquery(project=args.bq_project, dataset=args.bq_dataset,
+                                portal=args.portal, province=args.bq_province)
+    else:
+        df = load_from_excel(args.input)
     out = build(df)
 
     out_path = args.out or os.path.join(args.data_dir, f"{args.dataset_id}.json")
