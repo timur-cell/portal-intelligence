@@ -80,9 +80,13 @@ accordingly (search the field name; it's a single file).
 ## 4. Your roadmap (priority order)
 
 1. **Connect BigQuery (highest value).**
-   - Replace `load_from_excel()` with `load_from_bigquery()` in
-     `generate_data.py` (skeleton already there, project
-     `jamesedition-152413`).
+   - `load_from_bigquery()` in `generate_data.py` is now a **working,
+     parameterized loader** (auth via ADC/env, no keys) + a SQL skeleton
+     (`BQ_OFFICE_SQL`). **Your only job:** replace the three `*_TABLE`
+     placeholders (`OFFICES_TABLE`, `LISTINGS_TABLE`, `JE_OFFICE_MATCH_TABLE`)
+     with the real tables, then run `python3 generate_data.py --source bigquery
+     --bq-dataset <ds> --portal Idealista`. Output columns already match what
+     the dashboard consumes (verified against `BQ_COLUMN_MAP`).
    - Pull **JE's own live listing volume** per province/segment. This is the
      missing half of the **coverage-gap** widget — right now the competitor bar
      is real and the JE bar is `0` / "pending BQ". With JE volume you get an
