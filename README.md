@@ -16,15 +16,29 @@ listings-supply coverage view.
 
 ## What it does
 
-Two tabs, one shared filter bar:
+Three tabs, one shared filter bar:
 
-- **Agency Intelligence** — acquisition funnel (Gate 1 → 2 → 3), ICP
+- **Competitive Position** — the executive CI view: luxury **supply coverage**
+  (our share vs. the portal leader), **white-space** by town, **supply
+  concentration** (HHI / top-10 share), and the luxury differentiators —
+  international **buyer reach** and **tier-1 network vs. independent**.
+- **Agency Intelligence** — acquisition funnel (Gate 1 → 2 → 3), an
+  **Acquisition Priority Score** (0–100, ranked P1/P2/P3 queue), ICP
   qualification, JamesEdition presence/penetration, and luxury qualification.
 - **Listings Intelligence** — estimated supply by luxury segment, addressable
   volume and coverage gap by province, and inventory concentration by office.
 
 Every chart, KPI, and funnel stage is **clickable** — it opens a side panel
-listing the underlying agencies (with search, sort, and CSV export).
+listing the underlying agencies (with priority score, search, sort, and CSV
+export). The design rationale and sources are in [`RESEARCH.md`](./RESEARCH.md).
+
+### Acquisition Priority Score
+
+A transparent, additive 0–100 score computed client-side per office:
+**Fit** (ICP gate) + **Luxury value** (€1M+ depth, or tier proxy) +
+**Winnability** (not-yet-on-JE, inventory overlap) + **prestige Signals**
+(tier-1 network, tenure, international-HNWI focus). Tiered **P1 ≥ 65 · P2 ≥ 45 ·
+P3 ≥ 25**. It respects the active filters and exports with the CSV.
 
 ### The three gates
 
@@ -34,8 +48,9 @@ listing the underlying agencies (with search, sort, and CSV export).
 | **Gate 2 — JE Presence** | `1` already on JamesEdition · `0` not on JE | `Gate 2: JE Duplicate` |
 | **Gate 3 — Luxury** | count of listings priced ≥ €1M | `Gate 3: # Listings ≥ 1M€` |
 
-Gates 4–7 (overlap score, network/MLS, scraping qualification, website listing
-estimate) are stubbed in the UI as "in progress / coming soon".
+Gate 4 (overlap) and **Gate 5 (network/MLS — now live**, feeding the priority
+score and the Network view) are populated; Gates 6–7 (scraping qualification,
+website listing estimate) are stubbed in the UI as "coming soon".
 
 ---
 

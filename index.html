@@ -185,6 +185,18 @@ footer{margin-top:38px;text-align:center;font-size:11px;color:var(--light);line-
 .b-je-no{background:#f0f0f0;color:#888}
 .b-tier{background:#f4efe4;color:#8a774a}
 .b-neutral{background:var(--off-white);color:var(--mid)}
+.b-p1{background:var(--gold-dark);color:#fff}
+.b-p2{background:#efe7d2;color:#7a6a40}
+.b-p3{background:#f0f0f0;color:#777}
+.b-net{background:#e6f0f1;color:var(--teal-deep)}
+.score-pill{display:inline-block;min-width:30px;text-align:center;font-family:var(--serif);font-size:15px;color:var(--black);background:var(--off-white);border-radius:4px;padding:2px 7px}
+/* HHI gauge */
+.hhi-val{font-family:var(--serif);font-size:46px;line-height:1;margin:18px 0 2px}
+.hhi-band{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:4px 10px;border-radius:30px;display:inline-block}
+.hhi-track{height:8px;border-radius:30px;background:linear-gradient(90deg,#178475,#e79e32,#e63232);margin:18px 0 8px;position:relative}
+.hhi-mark{position:absolute;top:-4px;width:3px;height:16px;background:var(--black);border-radius:2px}
+.hhi-scale{display:flex;justify-content:space-between;font-size:10px;color:var(--light)}
+.hhi-note{font-size:11.5px;color:var(--mid);line-height:1.5;margin-top:12px}
 .ag-stat{flex:none;text-align:right}
 .ag-stat .v{font-family:var(--serif);font-size:19px;line-height:1}
 .ag-stat .l{font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--light);margin-top:3px}
@@ -208,7 +220,8 @@ footer{margin-top:38px;text-align:center;font-size:11px;color:var(--light);line-
   </div>
   <div class="tabs">
     <div class="tabset">
-      <div class="tab active" data-tab="agency">Agency Intelligence</div>
+      <div class="tab active" data-tab="market">Competitive Position</div>
+      <div class="tab" data-tab="agency">Agency Intelligence</div>
       <div class="tab" data-tab="listings">Listings Intelligence</div>
     </div>
     <div class="ds-wrap"><span class="ds-label">Dataset</span><select id="ds-switch" class="ds-switch"></select></div>
@@ -235,8 +248,51 @@ footer{margin-top:38px;text-align:center;font-size:11px;color:var(--light);line-
 
 <div class="wrap">
 
+  <!-- ============ TAB 0 : COMPETITIVE POSITION ============ -->
+  <div class="tabpane active" id="pane-market">
+
+    <section style="margin-top:30px">
+      <div class="note"><span class="ic">ⓘ</span><div><b>Executive view — our position vs. the local portal leader.</b> Market share is measured on the <b>luxury tier</b> (populated for offices on and off JE); exact €1M+ supply share and missing-listing counts arrive with BigQuery. Everything here respects the filter bar above.</div></div>
+    </section>
+
+    <section><div class="kpis" id="m-kpis"></div></section>
+
+    <section>
+      <div class="sec-head"><h2>Market Share &amp; Coverage</h2><span class="gate-tag">Supply share</span>
+        <span class="desc">Of the luxury agencies on the competitor portal, how many are already on JamesEdition. <span class="hint">Open = white space.</span></span></div>
+      <div class="grid-3">
+        <div class="panel"><h3>Luxury supply coverage <span class="clickable">click to drill</span></h3><div class="ph-sub">Luxury-tier offices: on JE vs. open opportunity</div>
+          <div class="chart-box"><canvas id="m-cov"></canvas></div></div>
+        <div class="panel" style="grid-column:span 2"><h3>Luxury white-space by town <span class="clickable">click a bar</span></h3><div class="ph-sub">Luxury-tier offices <b>not</b> yet on JE — where to expand next</div>
+          <div class="chart-box"><canvas id="m-white"></canvas></div></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="sec-head"><h2>Supply Structure &amp; Concentration</h2><span class="gate-tag">Market structure</span>
+        <span class="desc">Is supply held by a few big players or spread across many? Drives the acquisition motion.</span></div>
+      <div class="grid-3">
+        <div class="panel" style="grid-column:span 2"><h3>Supply concentration — top offices <span class="clickable">click a bar</span></h3><div class="ph-sub">Share of estimated addressable supply held by the largest offices (portals excluded)</div>
+          <div class="chart-box short" style="height:300px"><canvas id="m-conc"></canvas></div></div>
+        <div class="panel"><h3>Market concentration index</h3><div class="ph-sub">HHI on luxury supply — lower = more fragmented = broader opportunity</div>
+          <div id="m-hhi"></div></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="sec-head"><h2>Luxury Demand Reach</h2><span class="gate-tag">Niche edge</span>
+        <span class="desc">What a mass-market portal ignores: international buyer reach &amp; tier-1 networks.</span></div>
+      <div class="grid-2">
+        <div class="panel"><h3>Buyer audience of luxury offices <span class="clickable">click a bar</span></h3><div class="ph-sub">Primary buyer served — international HNWI reach is the luxury differentiator</div>
+          <div class="chart-box"><canvas id="m-buyers"></canvas></div></div>
+        <div class="panel"><h3>Network vs. independent <span class="clickable">click to drill</span></h3><div class="ph-sub">Tier-1 networks (Sotheby's, E&amp;V, Christie's…) vs. independents among luxury offices</div>
+          <div class="chart-box"><canvas id="m-net"></canvas></div></div>
+      </div>
+    </section>
+  </div>
+
   <!-- ============ TAB A : AGENCY ============ -->
-  <div class="tabpane active" id="pane-agency">
+  <div class="tabpane" id="pane-agency">
 
     <section>
       <div class="sec-head"><h2>The Acquisition Funnel</h2><span class="gate-tag">Gate 1 → 2 → 3</span>
@@ -245,6 +301,17 @@ footer{margin-top:38px;text-align:center;font-size:11px;color:var(--light);line-
     </section>
 
     <section><div class="kpis" id="kpis"></div></section>
+
+    <section>
+      <div class="sec-head"><h2>Acquisition Priority</h2><span class="gate-tag">Scoring model</span>
+        <span class="desc">A 0–100 score per office — <span class="hint">Fit + Luxury value + Winnability + prestige signals.</span></span></div>
+      <div class="grid-3">
+        <div class="panel"><h3>Priority tiers <span class="clickable">click a bar</span></h3><div class="ph-sub">P1 ≥ 65 · P2 ≥ 45 · P3 ≥ 25 — the ranked acquisition queue</div>
+          <div class="chart-box"><canvas id="c-prio"></canvas></div></div>
+        <div class="panel" style="grid-column:span 2"><h3>Top priority targets <span class="clickable">click a row</span></h3><div class="ph-sub">Highest-scoring offices in scope — export the full queue from any drill-down</div>
+          <ul class="statlist" id="prio-list"></ul></div>
+      </div>
+    </section>
 
     <section>
       <div class="sec-head"><h2>Gate 1 — ICP Qualification</h2><span class="gate-tag">Gate 1</span>
@@ -369,6 +436,7 @@ footer{margin-top:38px;text-align:center;font-size:11px;color:var(--light);line-
   <div class="ps-tools">
     <input class="psearch searchbox" id="ps-search" placeholder="Filter this list…">
     <select id="ps-sort">
+      <option value="score">Sort: Priority score</option>
       <option value="g3">Sort: Listings ≥€1M</option>
       <option value="est">Sort: Estimated listings</option>
       <option value="g4">Sort: Overlap score</option>
@@ -391,9 +459,32 @@ const tierLabel={ultra_luxury:'Ultra luxury',luxury:'Luxury',mid_luxury:'Mid lux
 const tierColor={ultra_luxury:'#b9a16f',luxury:'#cdb98a',mid_luxury:'#dfd5c0',non_luxury:'#d8d8d8',Unknown:'#efefef'};
 
 let state={region:'',prov:'',icp:'',tier:'',je:'',lux:'',q:''};
-let tab='agency';
+let tab='market';
 const charts={};
 const isQual=r=>r.g1===1||r.g1===2, isLux=r=>r.g3>=1, notJE=r=>r.g2===0;
+
+/* ===== Acquisition Priority Score (transparent, additive, 0..100) =====
+   Fit (ICP) gates the score; then luxury Value, Winnability, and prestige Signals.
+   Kept deliberately simple — research shows complex models kill sales adoption. */
+function priorityScore(r){
+  if(r.portal) return 0;                               // aggregators aren't acquisition targets
+  const fit={1:35,2:24,3:8,4:0}[r.g1]||0;              // Fit: Premier > Qualified > Review
+  let value;                                           // Luxury value: depth of €1M+ inventory…
+  if(r.g3!=null&&r.g3>0) value=Math.min(30,Math.round(8+14*Math.log10(1+r.g3)));
+  else value={ultra_luxury:18,luxury:12,mid_luxury:6}[r.tier]||0;   // …or tier proxy when g3 absent
+  const win=r.g2===1?0:Math.round(12+(r.g4||0)*8);     // Winnability: 0 if already a customer
+  let sig=0;                                           // Prestige signals
+  if(r.franchise===1) sig+=5;                          // tier-1 network
+  if(r.years>=10) sig+=4; else if(r.years>=3) sig+=2;  // established
+  if(r.buyers==='international_hnwi') sig+=4; else if(r.buyers==='expat_buyers'||r.buyers==='mixed') sig+=2;
+  if(r.tier==='ultra_luxury') sig+=2;
+  return Math.min(100,fit+value+win+sig);
+}
+const pTier=s=>s>=65?'P1':s>=45?'P2':s>=25?'P3':'';
+const pBadge=s=>{const t=pTier(s);return t?`<span class="badge b-${t.toLowerCase()}">${t} · ${s}</span>`:'';};
+function decorate(rows){rows.forEach(r=>{r.score=priorityScore(r);r.ptier=pTier(r.score);});}
+/* Herfindahl-Hirschman Index on a list of positive values (returns 0..10000) */
+function hhi(vals){const t=vals.reduce((a,b)=>a+b,0);if(!t)return 0;return Math.round(vals.reduce((a,v)=>a+Math.pow(v/t*100,2),0));}
 
 /* ---- filter option population (cascading) ---- */
 function uniq(arr){return [...new Set(arr)].filter(Boolean).sort();}
@@ -463,14 +554,16 @@ function renderPanelList(){
   const body=document.getElementById('ps-body');
   if(!list.length){body.innerHTML='<div class="ps-empty">No agencies match this selection.</div>';return;}
   body.innerHTML=list.slice(0,300).map((r,i)=>{
+    const prio=pBadge(r.score||0);
     const icp=r.icp?`<span class="badge ${icpClass[r.icp]||'b-review'}">${r.icp}</span>`:'';
     const je=r.g2===1?'<span class="badge b-je-yes">On JE</span>':'<span class="badge b-je-no">Open</span>';
     const tier=r.tier?`<span class="badge b-tier">${tierLabel[r.tier]||r.tier}</span>`:'';
+    const net=r.franchise===1?'<span class="badge b-net">Network</span>':'';
     const nm=r.url?`<a href="${r.url}" target="_blank" rel="noopener">${r.name||'—'}</a>`:(r.name||'—');
     return `<div class="ag-row"><div class="ag-rank">${i+1}</div>
       <div class="ag-main"><div class="ag-nm">${nm}</div>
-        <div class="ag-meta">${r.city||'—'} · ${(r.model||'').replace(/_/g,' ')||'—'}${r.g4?` · overlap ${r.g4.toFixed(2)}`:''}</div>
-        <div class="ag-tags">${icp}${tier}${je}</div></div>
+        <div class="ag-meta">${r.city||'—'} · ${(r.model||'').replace(/_/g,' ')||'—'}${r.years?` · ${Math.round(r.years)}y`:''}${r.g4?` · overlap ${r.g4.toFixed(2)}`:''}</div>
+        <div class="ag-tags">${prio}${icp}${tier}${net}${je}</div></div>
       <div class="ag-stat"><div class="v">${r.g3==null?'—':fmt(r.g3)}</div><div class="l">≥€1M</div>
         <div class="v" style="font-size:13px;margin-top:8px;color:#606060">${r.est==null?'—':fmt(r.est)}</div><div class="l">est. total</div></div>
     </div>`;}).join('')+(list.length>300?`<div class="ps-empty">Showing first 300 of ${fmt(list.length)}. Refine filters or export for the full list.</div>`:'');
@@ -478,9 +571,10 @@ function renderPanelList(){
 function exportCSV(){
   const q=document.getElementById('ps-search').value.toLowerCase();
   let list=panelRows.filter(r=>!q||(r.name||'').toLowerCase().includes(q));
-  const hdr=['Agency','City','Region','Province','ICP','Luxury tier','Model','On JE','Listings >=1M','Est listings','Overlap','URL'];
+  const hdr=['Priority score','Priority tier','Agency','City','Region','Province','ICP','Luxury tier','Model','Network','Years','On JE','Listings >=1M','Est listings','Overlap','URL'];
   const esc=v=>`"${(v==null?'':String(v)).replace(/"/g,'""')}"`;
-  const lines=[hdr.join(',')].concat(list.map(r=>[r.name,r.city,r.region,r.province,r.icp,r.tier,r.model,r.g2===1?'Yes':'No',r.g3,r.est,r.g4,r.url].map(esc).join(',')));
+  list=[...list].sort((a,b)=>(b.score||0)-(a.score||0));
+  const lines=[hdr.join(',')].concat(list.map(r=>[r.score,r.ptier,r.name,r.city,r.region,r.province,r.icp,r.tier,r.model,r.franchise===1?'Yes':'No',r.years==null?'':Math.round(r.years),r.g2===1?'Yes':'No',r.g3,r.est,r.g4,r.url].map(esc).join(',')));
   const blob=new Blob([lines.join('\n')],{type:'text/csv'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='je_agencies_'+(panelMeta.title||'list').replace(/[^a-z0-9]+/gi,'_').toLowerCase()+'.csv';a.click();
@@ -578,9 +672,10 @@ function renderAgencyCharts(rows,c){
 }
 function renderComingSoon(){
   const g4=AGG.gate4;
+  const nNet=ROWS.filter(r=>r.franchise===1).length, nInd=ROWS.filter(r=>r.franchise===0).length;
   const cards=[
     {g:'Gate 4',t:'Listing Overlap Score',st:'prog',stl:'In progress',body:`How much an office's inventory already overlaps with JE listings.`,partial:`<div class="partial"><b>${fmt(g4.withOverlap)}</b> offices with measurable overlap · avg ${g4.avg}</div>`},
-    {g:'Gate 5',t:'Network / MLS Detection',st:'soon',stl:'Coming soon',body:`Flags franchises, networks and MLS feeds to avoid double-counting and target head offices.`},
+    {g:'Gate 5',t:'Network / MLS Detection',st:'prog',stl:'Live',body:`Flags tier-1 networks &amp; franchises (now feeding the priority score &amp; the Network view) to target head offices and avoid double-counting.`,partial:`<div class="partial"><b>${fmt(nNet)}</b> networked · ${fmt(nInd)} independent</div>`},
     {g:'Gate 6',t:'Scraping Qualification',st:'prog',stl:'In progress',body:`Can we reliably scrape this office's own website for richer, fresher inventory?`,partial:`<div class="partial"><b>246</b> offices scored so far</div>`},
     {g:'Gate 7',t:'Est. Website Listings',st:'soon',stl:'Coming soon',body:`True portfolio size from the office's own site — beyond what's on Idealista.`},
   ];
@@ -633,6 +728,85 @@ function renderListings(rows,c){
   ].map(c=>`<div class="cs"><div class="csg">Needs BigQuery</div><h4>${c.t}</h4><p>${c.body}</p><span class="status st-soon">Coming soon</span></div>`).join('');
 }
 
+/* ================= COMPETITIVE POSITION TAB ================= */
+const isLuxTier=r=>r.tier==='ultra_luxury'||r.tier==='luxury';
+function renderMarket(rows,c){
+  const core=rows.filter(r=>!r.portal);
+  const lux=core.filter(isLuxTier);
+  const luxOnJE=lux.filter(r=>r.g2===1).length, luxOpen=lux.length-luxOnJE;
+  const cov=lux.length?Math.round(luxOnJE/lux.length*1000)/10:0;
+  // concentration on estimated addressable supply (portals excluded)
+  const ests=core.map(r=>r.est||0).filter(v=>v>0).sort((a,b)=>b-a);
+  const estTot=ests.reduce((a,b)=>a+b,0);
+  const hhiVal=hhi(ests);
+  const cr10=estTot?Math.round(ests.slice(0,10).reduce((a,b)=>a+b,0)/estTot*1000)/10:0;
+  const band=hhiVal<1000?['Fragmented','#178475']:hhiVal<1800?['Moderately concentrated','#a06a1e']:['Highly concentrated','#b23838'];
+
+  const mc=[
+    {l:'Luxury supply coverage',v:cov+'%',s:`<b>${fmt(luxOnJE)}</b> of <b>${fmt(lux.length)}</b> luxury offices on JE`,cls:'g2',pred:r=>isLuxTier(r)&&!r.portal&&r.g2===1,ttl:'Luxury offices on JamesEdition'},
+    {l:'Open luxury white-space',v:fmt(luxOpen),s:`luxury offices <b>not</b> yet on JE`,cls:'g3',pred:r=>isLuxTier(r)&&!r.portal&&r.g2===0,ttl:'Open luxury offices (white-space)'},
+    {l:'Supply concentration',v:fmt(hhiVal),s:`HHI · <b>${band[0]}</b> · top-10 hold ${cr10}%`,cls:'',nc:true},
+    {l:'Prime acquisition targets',v:fmt(c.prime),s:`qualified · not on JE · luxury`,cls:'prime',pred:r=>isQual(r)&&notJE(r)&&isLux(r),ttl:'Prime acquisition targets'},
+  ];
+  const mwrap=document.getElementById('m-kpis');
+  mwrap.innerHTML=mc.map(k=>`<div class="kpi ${k.nc?'nc ':''}${k.cls}"><div class="klabel">${k.l}</div>
+     <div class="kval">${k.v}</div><div class="ksub">${k.s}</div>${k.nc?'':'<div class="kgo">View agencies →</div>'}</div>`).join('');
+  mwrap.querySelectorAll('.kpi').forEach((d,i)=>{const k=mc[i];if(k.pred)d.onclick=()=>openPanel(k.ttl,'Competitive position',k.pred,scopeLabel());});
+
+  // coverage donut
+  donut('m-cov',['On JamesEdition','Open opportunity'],[luxOnJE,luxOpen],[COL.teal,COL.gold],
+    idx=>{if(idx===0)openPanel('Luxury offices on JE','Coverage',r=>isLuxTier(r)&&!r.portal&&r.g2===1,scopeLabel());
+      else openPanel('Open luxury offices','Coverage · white-space',r=>isLuxTier(r)&&!r.portal&&r.g2===0,scopeLabel());});
+
+  // white-space by city
+  const ws={};lux.filter(r=>r.g2===0).forEach(r=>{const k=r.city||'—';ws[k]=(ws[k]||0)+1;});
+  const wO=Object.entries(ws).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  bar('m-white',wO.map(x=>x[0]),[{label:'Open luxury offices',data:wO.map(x=>x[1]),backgroundColor:COL.gold}],
+    {onClick:idx=>{const city=wO[idx][0];openPanel(city+' — open luxury offices','Coverage · '+city,r=>isLuxTier(r)&&!r.portal&&r.g2===0&&(r.city||'—')===city,scopeLabel());}});
+
+  // concentration: top offices by est supply
+  const topE=[...core].filter(r=>r.est).sort((a,b)=>b.est-a.est).slice(0,12);
+  bar('m-conc',topE.map(r=>r.name),[{label:'Est. listings',data:topE.map(r=>r.est),backgroundColor:topE.map((r,i)=>i<4?COL.teal:COL.tealL)}],
+    {horiz:true,onClick:idx=>{const r=topE[idx];openPanel(r.name,'Supply concentration',x=>x.name===r.name,scopeLabel());}});
+
+  // HHI gauge
+  const pos=Math.min(hhiVal/3000*100,100);
+  document.getElementById('m-hhi').innerHTML=
+    `<div class="hhi-val">${fmt(hhiVal)}</div>
+     <span class="hhi-band" style="background:${band[1]}1a;color:${band[1]}">${band[0]}</span>
+     <div class="hhi-track"><div class="hhi-mark" style="left:${pos}%"></div></div>
+     <div class="hhi-scale"><span>0</span><span>1,000</span><span>1,800</span><span>3,000+</span></div>
+     <div class="hhi-note">Top 10 offices hold <b>${cr10}%</b> of estimated supply. Low HHI = a <b>fragmented</b> market with no dominant player — the right play is a <b>broad</b> acquisition motion across many luxury offices, with coverage % as the north star.</div>`;
+
+  // buyer reach among luxury offices
+  const by={};lux.forEach(r=>{const k=r.buyers||'Unknown';by[k]=(by[k]||0)+1;});
+  const bO=Object.entries(by).sort((a,b)=>b[1]-a[1]);
+  bar('m-buyers',bO.map(b=>b[0].replace(/_/g,' ')),[{label:'Luxury offices',data:bO.map(b=>b[1]),backgroundColor:COL.gold}],
+    {horiz:true,onClick:idx=>{const k=bO[idx][0];openPanel(k.replace(/_/g,' ')+' — luxury offices','Demand reach',r=>isLuxTier(r)&&!r.portal&&(r.buyers||'Unknown')===k,scopeLabel());}});
+
+  // network vs independent among luxury offices
+  const net=lux.filter(r=>r.franchise===1).length, ind=lux.filter(r=>r.franchise===0).length;
+  donut('m-net',['Tier-1 network','Independent'],[net,ind],[COL.teal,COL.goldL],
+    idx=>{if(idx===0)openPanel('Networked luxury offices','Demand reach · network',r=>isLuxTier(r)&&!r.portal&&r.franchise===1,scopeLabel());
+      else openPanel('Independent luxury offices','Demand reach · independent',r=>isLuxTier(r)&&!r.portal&&r.franchise===0,scopeLabel());});
+}
+
+/* ================= ACQUISITION PRIORITY (agency tab) ================= */
+function renderPriority(rows,c){
+  const tiers=[['P1','#b9a16f'],['P2','#dfd5c0'],['P3','#d8d8d8']];
+  const counts=tiers.map(([t])=>rows.filter(r=>r.ptier===t).length);
+  bar('c-prio',tiers.map(t=>t[0]),[{label:'Offices',data:counts,backgroundColor:tiers.map(t=>t[1])}],
+    {onClick:idx=>{const t=tiers[idx][0];openPanel(t+' priority targets','Scoring · '+t,r=>r.ptier===t,scopeLabel());}});
+  const top=[...rows].filter(r=>r.score>0).sort((a,b)=>b.score-a.score).slice(0,15);
+  const ul=document.getElementById('prio-list');
+  ul.innerHTML=top.length?top.map((r,i)=>`<li data-nm="${(r.name||'').replace(/"/g,'&quot;')}">
+      <span class="nm"><span class="ag-rank" style="width:18px">${i+1}</span> ${r.name||'—'}
+        <small style="color:var(--light);margin-left:8px">${r.city||''}${r.g2===1?' · on JE':''}</small></span>
+      <span class="vv"><span class="badge b-${(r.ptier||'p3').toLowerCase()}" style="margin-right:8px">${r.ptier||'—'}</span><span class="score-pill">${r.score}</span></span></li>`).join('')
+    :'<li><span class="nm" style="color:var(--light)">No scored offices in scope.</span></li>';
+  ul.querySelectorAll('li[data-nm]').forEach(li=>li.onclick=()=>{const nm=li.dataset.nm;openPanel(nm,'Priority target',x=>x.name===nm,scopeLabel());});
+}
+
 /* ---- scope label for panel context ---- */
 function scopeLabel(){
   const bits=[];
@@ -649,7 +823,8 @@ function renderAll(){
   const rows=filtered();const c=compute(rows);
   // context line
   document.getElementById('fctx').innerHTML=`<b>${fmt(rows.length)}</b> offices in scope`;
-  if(tab==='agency'){renderFunnel(rows,c);renderKPIs(c);renderAgencyCharts(rows,c);}
+  if(tab==='market'){renderMarket(rows,c);}
+  else if(tab==='agency'){renderFunnel(rows,c);renderKPIs(c);renderPriority(rows,c);renderAgencyCharts(rows,c);}
   else{renderListings(rows,c);}
 }
 
@@ -694,7 +869,7 @@ function resetFilters(){
 }
 function loadDataset(file){
   return fetchJSON('./'+file).then(function(d){
-    DATA=d;ROWS=d.rows;AGG=d.agg;applyScope();resetFilters();closePanel();boot();
+    DATA=d;ROWS=d.rows;AGG=d.agg;decorate(ROWS);applyScope();resetFilters();closePanel();boot();
   });
 }
 function showLoadError(err){
