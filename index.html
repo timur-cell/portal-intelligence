@@ -480,11 +480,14 @@ function priorityScore(r){
   if(r.tier==='ultra_luxury') sig+=2;
   return Math.min(100,fit+value+win+sig);
 }
-const pTier=s=>s>=65?'P1':s>=45?'P2':s>=25?'P3':'';
+const PTIERS=[{t:'P1',min:65,col:'#b9a16f'},{t:'P2',min:45,col:'#dfd5c0'},{t:'P3',min:25,col:'#d8d8d8'}];
+const pTier=s=>(PTIERS.find(x=>s>=x.min)||{t:''}).t;
 const pBadge=s=>{const t=pTier(s);return t?`<span class="badge b-${t.toLowerCase()}">${t} · ${s}</span>`:'';};
 function decorate(rows){rows.forEach(r=>{r.score=priorityScore(r);r.ptier=pTier(r.score);});}
 /* Herfindahl-Hirschman Index on a list of positive values (returns 0..10000) */
 function hhi(vals){const t=vals.reduce((a,b)=>a+b,0);if(!t)return 0;return Math.round(vals.reduce((a,v)=>a+Math.pow(v/t*100,2),0));}
+/* tally rows into {key: count} */
+function countBy(arr,key){const o={};arr.forEach(r=>{const k=key(r);o[k]=(o[k]||0)+1;});return o;}
 
 /* ---- filter option population (cascading) ---- */
 function uniq(arr){return [...new Set(arr)].filter(Boolean).sort();}
@@ -573,7 +576,7 @@ function exportCSV(){
   let list=panelRows.filter(r=>!q||(r.name||'').toLowerCase().includes(q));
   const hdr=['Priority score','Priority tier','Agency','City','Region','Province','ICP','Luxury tier','Model','Network','Years','On JE','Listings >=1M','Est listings','Overlap','URL'];
   const esc=v=>`"${(v==null?'':String(v)).replace(/"/g,'""')}"`;
-  list=[...list].sort((a,b)=>(b.score||0)-(a.score||0));
+  list.sort((a,b)=>(b.score||0)-(a.score||0));
   const lines=[hdr.join(',')].concat(list.map(r=>[r.score,r.ptier,r.name,r.city,r.region,r.province,r.icp,r.tier,r.model,r.franchise===1?'Yes':'No',r.years==null?'':Math.round(r.years),r.g2===1?'Yes':'No',r.g3,r.est,r.g4,r.url].map(esc).join(',')));
   const blob=new Blob([lines.join('\n')],{type:'text/csv'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
@@ -730,6 +733,7 @@ function renderListings(rows,c){
 
 /* ================= COMPETITIVE POSITION TAB ================= */
 const isLuxTier=r=>r.tier==='ultra_luxury'||r.tier==='luxury';
+const luxCore=r=>isLuxTier(r)&&!r.portal;   // a luxury-tier office that isn't a portal/aggregator
 function renderMarket(rows,c){
   const core=rows.filter(r=>!r.portal);
   const lux=core.filter(isLuxTier);
@@ -743,8 +747,8 @@ function renderMarket(rows,c){
   const band=hhiVal<1000?['Fragmented','#178475']:hhiVal<1800?['Moderately concentrated','#a06a1e']:['Highly concentrated','#b23838'];
 
   const mc=[
-    {l:'Luxury supply coverage',v:cov+'%',s:`<b>${fmt(luxOnJE)}</b> of <b>${fmt(lux.length)}</b> luxury offices on JE`,cls:'g2',pred:r=>isLuxTier(r)&&!r.portal&&r.g2===1,ttl:'Luxury offices on JamesEdition'},
-    {l:'Open luxury white-space',v:fmt(luxOpen),s:`luxury offices <b>not</b> yet on JE`,cls:'g3',pred:r=>isLuxTier(r)&&!r.portal&&r.g2===0,ttl:'Open luxury offices (white-space)'},
+    {l:'Luxury supply coverage',v:cov+'%',s:`<b>${fmt(luxOnJE)}</b> of <b>${fmt(lux.length)}</b> luxury offices on JE`,cls:'g2',pred:r=>luxCore(r)&&r.g2===1,ttl:'Luxury offices on JamesEdition'},
+    {l:'Open luxury white-space',v:fmt(luxOpen),s:`luxury offices <b>not</b> yet on JE`,cls:'g3',pred:r=>luxCore(r)&&r.g2===0,ttl:'Open luxury offices (white-space)'},
     {l:'Supply concentration',v:fmt(hhiVal),s:`HHI · <b>${band[0]}</b> · top-10 hold ${cr10}%`,cls:'',nc:true},
     {l:'Prime acquisition targets',v:fmt(c.prime),s:`qualified · not on JE · luxury`,cls:'prime',pred:r=>isQual(r)&&notJE(r)&&isLux(r),ttl:'Prime acquisition targets'},
   ];
@@ -755,17 +759,17 @@ function renderMarket(rows,c){
 
   // coverage donut
   donut('m-cov',['On JamesEdition','Open opportunity'],[luxOnJE,luxOpen],[COL.teal,COL.gold],
-    idx=>{if(idx===0)openPanel('Luxury offices on JE','Coverage',r=>isLuxTier(r)&&!r.portal&&r.g2===1,scopeLabel());
-      else openPanel('Open luxury offices','Coverage · white-space',r=>isLuxTier(r)&&!r.portal&&r.g2===0,scopeLabel());});
+    idx=>{if(idx===0)openPanel('Luxury offices on JE','Coverage',r=>luxCore(r)&&r.g2===1,scopeLabel());
+      else openPanel('Open luxury offices','Coverage · white-space',r=>luxCore(r)&&r.g2===0,scopeLabel());});
 
   // white-space by city
-  const ws={};lux.filter(r=>r.g2===0).forEach(r=>{const k=r.city||'—';ws[k]=(ws[k]||0)+1;});
+  const ws=countBy(lux.filter(r=>r.g2===0),r=>r.city||'—');
   const wO=Object.entries(ws).sort((a,b)=>b[1]-a[1]).slice(0,10);
   bar('m-white',wO.map(x=>x[0]),[{label:'Open luxury offices',data:wO.map(x=>x[1]),backgroundColor:COL.gold}],
-    {onClick:idx=>{const city=wO[idx][0];openPanel(city+' — open luxury offices','Coverage · '+city,r=>isLuxTier(r)&&!r.portal&&r.g2===0&&(r.city||'—')===city,scopeLabel());}});
+    {onClick:idx=>{const city=wO[idx][0];openPanel(city+' — open luxury offices','Coverage · '+city,r=>luxCore(r)&&r.g2===0&&(r.city||'—')===city,scopeLabel());}});
 
   // concentration: top offices by est supply
-  const topE=[...core].filter(r=>r.est).sort((a,b)=>b.est-a.est).slice(0,12);
+  const topE=core.filter(r=>r.est).sort((a,b)=>b.est-a.est).slice(0,12);
   bar('m-conc',topE.map(r=>r.name),[{label:'Est. listings',data:topE.map(r=>r.est),backgroundColor:topE.map((r,i)=>i<4?COL.teal:COL.tealL)}],
     {horiz:true,onClick:idx=>{const r=topE[idx];openPanel(r.name,'Supply concentration',x=>x.name===r.name,scopeLabel());}});
 
@@ -779,25 +783,24 @@ function renderMarket(rows,c){
      <div class="hhi-note">Top 10 offices hold <b>${cr10}%</b> of estimated supply. Low HHI = a <b>fragmented</b> market with no dominant player — the right play is a <b>broad</b> acquisition motion across many luxury offices, with coverage % as the north star.</div>`;
 
   // buyer reach among luxury offices
-  const by={};lux.forEach(r=>{const k=r.buyers||'Unknown';by[k]=(by[k]||0)+1;});
+  const by=countBy(lux,r=>r.buyers||'Unknown');
   const bO=Object.entries(by).sort((a,b)=>b[1]-a[1]);
   bar('m-buyers',bO.map(b=>b[0].replace(/_/g,' ')),[{label:'Luxury offices',data:bO.map(b=>b[1]),backgroundColor:COL.gold}],
-    {horiz:true,onClick:idx=>{const k=bO[idx][0];openPanel(k.replace(/_/g,' ')+' — luxury offices','Demand reach',r=>isLuxTier(r)&&!r.portal&&(r.buyers||'Unknown')===k,scopeLabel());}});
+    {horiz:true,onClick:idx=>{const k=bO[idx][0];openPanel(k.replace(/_/g,' ')+' — luxury offices','Demand reach',r=>luxCore(r)&&(r.buyers||'Unknown')===k,scopeLabel());}});
 
   // network vs independent among luxury offices
   const net=lux.filter(r=>r.franchise===1).length, ind=lux.filter(r=>r.franchise===0).length;
   donut('m-net',['Tier-1 network','Independent'],[net,ind],[COL.teal,COL.goldL],
-    idx=>{if(idx===0)openPanel('Networked luxury offices','Demand reach · network',r=>isLuxTier(r)&&!r.portal&&r.franchise===1,scopeLabel());
-      else openPanel('Independent luxury offices','Demand reach · independent',r=>isLuxTier(r)&&!r.portal&&r.franchise===0,scopeLabel());});
+    idx=>{if(idx===0)openPanel('Networked luxury offices','Demand reach · network',r=>luxCore(r)&&r.franchise===1,scopeLabel());
+      else openPanel('Independent luxury offices','Demand reach · independent',r=>luxCore(r)&&r.franchise===0,scopeLabel());});
 }
 
 /* ================= ACQUISITION PRIORITY (agency tab) ================= */
-function renderPriority(rows,c){
-  const tiers=[['P1','#b9a16f'],['P2','#dfd5c0'],['P3','#d8d8d8']];
-  const counts=tiers.map(([t])=>rows.filter(r=>r.ptier===t).length);
-  bar('c-prio',tiers.map(t=>t[0]),[{label:'Offices',data:counts,backgroundColor:tiers.map(t=>t[1])}],
-    {onClick:idx=>{const t=tiers[idx][0];openPanel(t+' priority targets','Scoring · '+t,r=>r.ptier===t,scopeLabel());}});
-  const top=[...rows].filter(r=>r.score>0).sort((a,b)=>b.score-a.score).slice(0,15);
+function renderPriority(rows){
+  const counts=PTIERS.map(x=>rows.filter(r=>r.ptier===x.t).length);
+  bar('c-prio',PTIERS.map(x=>x.t),[{label:'Offices',data:counts,backgroundColor:PTIERS.map(x=>x.col)}],
+    {onClick:idx=>{const t=PTIERS[idx].t;openPanel(t+' priority targets','Scoring · '+t,r=>r.ptier===t,scopeLabel());}});
+  const top=rows.filter(r=>r.score>0).sort((a,b)=>b.score-a.score).slice(0,15);
   const ul=document.getElementById('prio-list');
   ul.innerHTML=top.length?top.map((r,i)=>`<li data-nm="${(r.name||'').replace(/"/g,'&quot;')}">
       <span class="nm"><span class="ag-rank" style="width:18px">${i+1}</span> ${r.name||'—'}
@@ -824,7 +827,7 @@ function renderAll(){
   // context line
   document.getElementById('fctx').innerHTML=`<b>${fmt(rows.length)}</b> offices in scope`;
   if(tab==='market'){renderMarket(rows,c);}
-  else if(tab==='agency'){renderFunnel(rows,c);renderKPIs(c);renderPriority(rows,c);renderAgencyCharts(rows,c);}
+  else if(tab==='agency'){renderFunnel(rows,c);renderKPIs(c);renderPriority(rows);renderAgencyCharts(rows,c);}
   else{renderListings(rows,c);}
 }
 
