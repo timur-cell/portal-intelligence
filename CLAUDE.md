@@ -65,10 +65,70 @@ When adding a metric, prefer computing it client-side from `rows` (see
 ## Common tasks
 
 - **Refresh / add a region:** `python3 generate_data.py --input raw/<export>.xlsx --dataset-id <slug> --country <C> --label "<label>"` (writes `data/<slug>.json` and updates `datasets.json`; new regions appear in the switcher with no front-end change).
-- **Switch to BigQuery:** implement `load_from_bigquery()` in the script
-  (project `jamesedition-152413`), keep the output shape identical.
+- **Switch to BigQuery:** `load_from_bigquery()` is already scaffolded (parameterized
+  loader + `BQ_OFFICE_SQL` placeholders + `BQ_COLUMN_MAP`); just fill the table names.
+  Project `jamesedition-152413`. Keep the output shape identical. See the
+  **Live data: BigQuery access** section below for verified tables/gotchas.
 - **Add a gate widget:** populate the field in `generate_data.py` → add a panel
   + `bar()/donut()` in the relevant tab → wire `onClick` → `openPanel`.
+
+## Live data: BigQuery access (verified 2026-06)
+
+JE's warehouse is reachable **in-session via MCP tools** — no service-account key
+needed, and **never paste/commit one** (repo may be public). Tools:
+`Bigquery_Query_Database` (query string only) and `Bigquery_Schema_Check`
+(`datasetId`, `tableName`). ⚠️ `INFORMATION_SCHEMA` is **blocked** — you can't
+enumerate tables, you must already know the names.
+
+**JE platform tables (Postgres mirror, `pg_` prefix):**
+- `data_marts.pg_offices` — JE offices. Cols incl. `office_id, name, city,
+  country_code, country_subdivision, listings_count, agents_count,
+  business_group1..4_id` (networks), `mls, external_url, path, vat_id, email,
+  office_deleted_at`.
+- `data_marts.pg_listings` — JE listings. Cols incl. `listing_id, office_id,
+  price_cents, price_cents_usd, currency, country_code, country_subdivision,
+  canonic_country_subdivision_id, canonic_city_id, active, state, type, rental,
+  listing_created_at, listing_deleted_at, available_for_jamesedition, listing_score`.
+- Scale: JE Spain ≈ **4,093 offices / 525k listings** (US ~100k offices, FR 12.7k, IT 6.8k).
+
+**Gotchas when querying:**
+- **€1M luxury**: no native EUR price column. Quick proxy used so far:
+  `price_cents_usd >= 108000000` (~$1.08M ≈ €1M). For precision, convert FX or
+  filter `currency='EUR' AND price_cents>=100000000`.
+- **Geo is messy free-text**: `country_subdivision` for Málaga shows as
+  `MALAGA/Malaga/Málaga/MA/M`, Andalucía as `AN/Andalusia`. **Join on the
+  canonical integer keys** `canonic_country_subdivision_id`/`canonic_city_id`,
+  not the strings. (Geo dimension table mapping id→name still TBD.)
+- Always filter `*_deleted_at IS NULL` and (for supply) `active=TRUE`, `rental=FALSE`.
+
+**Still needed from the team to finish `load_from_bigquery()`** (placeholders in
+`generate_data.py`: `OFFICES_TABLE`, `LISTINGS_TABLE`, `JE_OFFICE_MATCH_TABLE`):
+1. Scraped **competitor** offices/listings `dataset.table` names (Idealista etc.).
+2. Where the **ICP gate enrichment** (`g1, tier, buyers, model, franchise, years`)
+   lives — a BigQuery table or an external/Excel step?
+3. **Geo dimension** table (canonic ids → names).
+4. **Office-match key** competitor↔JE (domain? `external_url`/`vat_id`/`name`?).
+
+## Dashboard structure (post-2026-06 build)
+
+Three tabs (see `index.html`): **`market`** (Competitive Position — *default*),
+`agency`, `listings`. Rationale + sources in `RESEARCH.md`.
+- **Acquisition Priority Score** — `priorityScore(r)` (Fit+Value+Winnability+Signals,
+  0–100), `PTIERS` (single source of truth for thresholds **65/45/25** + bar colors),
+  `pTier`/`pBadge`. `decorate(ROWS)` runs once in `loadDataset` and sets
+  `r.score`/`r.ptier` (compute-once, not per render).
+- Helpers added: `hhi(vals)`, `countBy(arr,key)`, `luxCore=r=>isLuxTier(r)&&!r.portal`.
+- `renderMarket(rows,c)` + `renderPriority(rows)`. **Coverage is measured on
+  `tier`** (luxury/ultra) because **`g3` is null for all on-JE offices** in the
+  current snapshot — do NOT compute €1M+ supply-share from `g3` (reads 0%). Exact
+  supply-share waits on BigQuery per-listing prices.
+
+## Deploy
+
+Live at **https://timur-cell.github.io/portal-intelligence/**. Workflow
+`.github/workflows/deploy-pages.yml` deploys on push to `main`. The auto-created
+`github-pages` environment **only allows deploys from the default branch (`main`)**
+— branch deploys fail instantly (no runner/logs); merge to `main` to publish.
 
 ## Guardrails
 
